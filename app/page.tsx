@@ -15,11 +15,11 @@ const SHOWCASE_TRACKS = [
     previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/1a/9d/8f/1a9d8fcd-e978-4fd3-e7fb-71db7d9e8ac4/mzaf_2669373785479159902.plus.aac.p.m4a",
   },
   {
-    title: "Chirunama Thana Chirunama",
-    artist: "Yazin Nizar & Karimulla",
-    genre: "Ekkadiki Pothavu Chinnavada",
-    artwork: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/8e/25/b5/8e25b558-b7e6-e824-414c-b54a4014f65f/cover.jpg/600x600bb.jpg",
-    previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/f7/0f/47/f70f47f5-fcd7-2f0d-2969-b198fc67f3d4/mzaf_3414447984203533742.plus.aac.p.m4a",
+    title: "Hello!",
+    artist: "Armaan Malik",
+    genre: "Hello! (Original Motion Picture Soundtrack)",
+    artwork: "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/e3/9e/bf/e39ebf5b-578e-ad4e-2306-704d84fa6f12/cover.jpg/600x600bb.jpg",
+    previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/b8/f1/27/b8f12759-6778-7101-407d-0f72f6254db5/mzaf_2406318888854172343.plus.aac.p.m4a",
   },
   {
     title: "Vesane O Nicchena",
@@ -46,12 +46,16 @@ const SHOWCASE_TRACKS = [
 
 function LandingMusicShowcase() {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [customTrack, setCustomTrack] = useState<(typeof SHOWCASE_TRACKS)[0] | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<(typeof SHOWCASE_TRACKS)[0][]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const activeTrack = SHOWCASE_TRACKS[activeIdx];
+  const activeTrack = customTrack || SHOWCASE_TRACKS[activeIdx];
 
   useEffect(() => {
     return () => {
@@ -62,16 +66,51 @@ function LandingMusicShowcase() {
     };
   }, []);
 
-  const handleSelectTrack = (index: number) => {
+  // Debounced iTunes live search for any song worldwide
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery.trim())}&media=music&entity=song&limit=5`
+        );
+        const data = await res.json();
+        if (data.results && Array.isArray(data.results)) {
+          const mapped = data.results
+            .filter((item: { previewUrl?: string }) => Boolean(item.previewUrl))
+            .map((item: { trackName: string; artistName: string; collectionName?: string; artworkUrl100?: string; previewUrl: string }) => ({
+              title: item.trackName,
+              artist: item.artistName,
+              genre: item.collectionName || "Single",
+              artwork: item.artworkUrl100 ? item.artworkUrl100.replace("100x100bb", "600x600bb") : "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80",
+              previewUrl: item.previewUrl,
+            }));
+          setSearchResults(mapped);
+        }
+      } catch (err) {
+        console.error("iTunes search error:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const playTrackAudio = (track: (typeof SHOWCASE_TRACKS)[0]) => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
-    setActiveIdx(index);
     setIsPlaying(false);
     setProgress(0);
     setCurrentTime(0);
 
-    const track = SHOWCASE_TRACKS[index];
     if (track.previewUrl) {
       const audio = new Audio(track.previewUrl);
       audioRef.current = audio;
@@ -90,23 +129,21 @@ function LandingMusicShowcase() {
     }
   };
 
+  const handleSelectTrack = (index: number) => {
+    setCustomTrack(null);
+    setActiveIdx(index);
+    playTrackAudio(SHOWCASE_TRACKS[index]);
+  };
+
+  const handleSelectSearchedTrack = (track: (typeof SHOWCASE_TRACKS)[0]) => {
+    setCustomTrack(track);
+    playTrackAudio(track);
+  };
+
   const togglePlay = () => {
     if (!audioRef.current) {
       if (activeTrack.previewUrl) {
-        const audio = new Audio(activeTrack.previewUrl);
-        audioRef.current = audio;
-        audio.ontimeupdate = () => {
-          if (audio.duration) {
-            setProgress((audio.currentTime / audio.duration) * 100);
-            setCurrentTime(audio.currentTime);
-          }
-        };
-        audio.onended = () => {
-          setIsPlaying(false);
-          setProgress(0);
-          setCurrentTime(0);
-        };
-        audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+        playTrackAudio(activeTrack);
       }
       return;
     }
@@ -347,7 +384,7 @@ function LandingMusicShowcase() {
                 Popular:
               </span>
               {SHOWCASE_TRACKS.map((t, idx) => {
-                const isSelected = activeIdx === idx;
+                const isSelected = !customTrack && activeIdx === idx;
                 const shortLabel = t.title.length > 18 ? t.title.substring(0, 16) + '…' : t.title;
                 return (
                   <button
@@ -370,6 +407,137 @@ function LandingMusicShowcase() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Live Global Song Search */}
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              paddingTop: 8,
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+            }}>
+              <div style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+              }}>
+                <span style={{
+                  position: "absolute",
+                  left: 10,
+                  color: "#d4a574",
+                  fontSize: 12,
+                  pointerEvents: "none",
+                }}>
+                  🔍
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search any song in the world (English, Telugu, Hindi...)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: "100%",
+                    background: "rgba(0,0,0,0.45)",
+                    border: "1px solid rgba(212,165,116,0.22)",
+                    borderRadius: 10,
+                    padding: "7px 28px 7px 28px",
+                    color: "#faf8f5",
+                    fontSize: 12,
+                    fontFamily: "'Crimson Pro', serif",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = "#d4a574")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(212,165,116,0.22)")}
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSearchResults([]);
+                    }}
+                    style={{
+                      position: "absolute",
+                      right: 8,
+                      background: "none",
+                      border: "none",
+                      color: "rgba(250,248,245,0.5)",
+                      fontSize: 11,
+                      cursor: "pointer",
+                      padding: "2px 4px",
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Searching Indicator */}
+              {isSearching && (
+                <div style={{ fontSize: 11, color: "#d4a574", fontStyle: "italic", paddingLeft: 4 }}>
+                  Searching millions of songs...
+                </div>
+              )}
+
+              {/* Search Results Dropdown List */}
+              {searchResults.length > 0 && (
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                  maxHeight: 180,
+                  overflowY: "auto",
+                  background: "rgba(10,3,7,0.85)",
+                  border: "1px solid rgba(212,165,116,0.25)",
+                  borderRadius: 10,
+                  padding: "4px",
+                }}>
+                  {searchResults.map((song, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleSelectSearchedTrack(song)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "6px 8px",
+                        background: customTrack?.title === song.title ? "rgba(212,165,116,0.22)" : "transparent",
+                        border: "none",
+                        borderRadius: 6,
+                        color: "#faf8f5",
+                        textAlign: "left",
+                        cursor: "pointer",
+                        width: "100%",
+                        transition: "background 0.15s ease",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(212,165,116,0.18)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = customTrack?.title === song.title ? "rgba(212,165,116,0.22)" : "transparent")}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={song.artwork}
+                        alt={song.title}
+                        style={{ width: 28, height: 28, borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: "#faf8f5", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {song.title}
+                        </div>
+                        <div style={{ fontSize: 10.5, color: "rgba(250,248,245,0.65)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {song.artist}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 11, color: "#d4a574", flexShrink: 0, fontWeight: 700 }}>
+                        ▶ Play
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
