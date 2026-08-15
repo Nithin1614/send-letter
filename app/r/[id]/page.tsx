@@ -258,8 +258,19 @@ function SongPlayer({
   useEffect(() => {
     if (!songPreviewUrl) return;
     const audio = new Audio(songPreviewUrl);
-    audio.volume = 0.7;
+    audio.volume = 0.05;
     audioRef.current = audio;
+
+    // Gentle 1.5s fade in to 50% max volume
+    const startTime = Date.now();
+    const fadeInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const p = Math.min(elapsed / 1500, 1);
+      if (audio) {
+        audio.volume = Math.min(0.05 + (0.50 - 0.05) * p, 0.50);
+      }
+      if (p >= 1) clearInterval(fadeInterval);
+    }, 50);
 
     audio.addEventListener('timeupdate', () => {
       if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
@@ -270,6 +281,7 @@ function SongPlayer({
     audio.play().then(() => setPlaying(true)).catch(() => setBlocked(true));
 
     return () => {
+      clearInterval(fadeInterval);
       audio.pause();
       audio.src = '';
     };

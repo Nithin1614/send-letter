@@ -103,6 +103,21 @@ function LandingMusicShowcase() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const fadeInAudio = (audio: HTMLAudioElement, targetVol = 0.50, durationMs = 1500) => {
+    audio.volume = 0.05;
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const p = Math.min(elapsed / durationMs, 1);
+      if (audio) {
+        audio.volume = Math.min(0.05 + (targetVol - 0.05) * p, targetVol);
+      }
+      if (p >= 1) {
+        clearInterval(interval);
+      }
+    }, 50);
+  };
+
   const playTrackAudio = (track: (typeof SHOWCASE_TRACKS)[0]) => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -114,6 +129,7 @@ function LandingMusicShowcase() {
     if (track.previewUrl) {
       const audio = new Audio(track.previewUrl);
       audioRef.current = audio;
+      fadeInAudio(audio, 0.50, 1500);
       audio.ontimeupdate = () => {
         if (audio.duration) {
           setProgress((audio.currentTime / audio.duration) * 100);

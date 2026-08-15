@@ -82,8 +82,17 @@ export default function InteractiveUnsealDemo() {
             try {
               if (!audioPreviewRef.current) {
                 const audio = new Audio("https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/47/94/8f/47948f21-bb5c-9cb7-7f99-2766e4a2c077/mzaf_11309855581177651817.plus.aac.p.m4a");
-                audio.volume = 0.35;
+                audio.volume = 0.05;
                 audioPreviewRef.current = audio;
+                const startTime = Date.now();
+                const fadeInterval = setInterval(() => {
+                  const elapsed = Date.now() - startTime;
+                  const p = Math.min(elapsed / 1500, 1);
+                  if (audio) {
+                    audio.volume = Math.min(0.05 + (0.45 - 0.05) * p, 0.45);
+                  }
+                  if (p >= 1) clearInterval(fadeInterval);
+                }, 50);
               }
               audioPreviewRef.current.play().then(() => setIsPlayingSong(true)).catch(() => {});
             } catch {}
