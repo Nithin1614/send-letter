@@ -23,6 +23,20 @@ export interface Letter {
   question?: string;
   answer?: string;
   unlockAt?: string;
+  replyToId?: string;
+  replyLetterId?: string;
+  senderEmail?: string;
+  recipientEmail?: string;
+  scheduledFor?: string;
+  deliveryStatus?: 'draft' | 'scheduled' | 'delivered';
+  ambientSoundscape?: string;
+  openingStyle?: 'wax-seal' | 'envelope-unfold';
+  letterTheme?: string;
+  reactions?: string[];
+  viewCount?: number;
+  attemptCount?: number;
+  lastViewedAt?: string;
+  events?: Array<{ id: string; type: string; metadata: any; createdAt: string }>;
   createdAt: string;
   openedAt?: string;
 }

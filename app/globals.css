@@ -1,5 +1,4 @@
-/* Fonts loaded via next/font/google in layout.tsx — no @import needed */
-
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&display=swap');
 
 :root {
   --bg:          #080305;
@@ -129,12 +128,12 @@ body::before {
 /* ── NAVBAR ───────────────────────────────────────────── */
 .navbar {
   position: sticky;
-  top: 37px;
+  top: 0;
   z-index: 99;
-  background: rgba(10,6,6,0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(212,165,116,0.06);
+  background: rgba(12, 5, 9, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 165, 116, 0.12);
   padding: 0 32px;
   height: 64px;
   display: flex;
@@ -284,32 +283,31 @@ body::before {
 
 /* ── HERO ─────────────────────────────────────────────── */
 .hero-section {
-  min-height: 100vh;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   text-align: center;
-  padding: 80px 2rem 100px;
+  padding: 32px 2rem 48px;
   position: relative;
   overflow: hidden;
 }
 .hero-seal {
-  width: 120px; height: 120px; border-radius: 50%;
+  width: 68px; height: 68px; border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, #e0303a 0%, #c41e3a 25%, #8b2020 60%, #5c1616 100%);
-  box-shadow: 0 0 60px rgba(196,30,58,0.35), 0 0 120px rgba(139,32,32,0.2), 0 8px 32px rgba(0,0,0,0.6);
+  box-shadow: 0 0 32px rgba(196,30,58,0.45), 0 0 64px rgba(139,32,32,0.2), 0 6px 18px rgba(0,0,0,0.5);
   display: flex; align-items: center; justify-content: center;
-  font-size: 52px; line-height: 1;
-  margin-bottom: 32px;
+  font-size: 30px; line-height: 1;
+  margin-bottom: 14px;
   animation: seal-float 4s ease-in-out infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @keyframes seal-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-9px); }
+  50% { transform: translateY(-6px); }
 }
 @keyframes floatSeal {
-  0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 0 40px rgba(196,30,58,0.35); }
-  50% { transform: translateY(-10px) scale(1.02); box-shadow: 0 0 60px rgba(196,30,58,0.5); }
+  0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 0 30px rgba(196,30,58,0.35); }
+  50% { transform: translateY(-7px) scale(1.02); box-shadow: 0 0 45px rgba(196,30,58,0.5); }
 }
 @keyframes letter-fade-in {
   from { opacity: 0; transform: translateY(20px); }
@@ -327,10 +325,10 @@ body::before {
 @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
 .hero-est {
   font-family: 'Crimson Pro', serif;
-  font-size: 12px; letter-spacing: 0.4em;
+  font-size: 11.5px; letter-spacing: 0.35em;
   text-transform: uppercase;
   color: rgba(212,165,116,0.45);
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 .hero-title {
   font-family: 'Playfair Display', serif;
@@ -1615,11 +1613,18 @@ body::before {
   .features-grid { grid-template-columns: 1fr; }
   .footer-inner { grid-template-columns: 1fr 1fr; }
   .ow-items { grid-template-columns: 1fr; }
-  .templates-grid { grid-template-columns: repeat(2, 260px); }
+  .templates-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important; justify-content: center; }
 }
 @media (max-width: 480px) {
   .footer-inner { grid-template-columns: 1fr; }
-  .templates-grid { grid-template-columns: 260px; }
+  .templates-grid { grid-template-columns: 1fr !important; }
+  .hero-explore-pill {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 0 auto 20px auto !important;
+    font-size: 11.5px !important;
+  }
 }
 
 /* ── PREMIUM LANDING PAGE CSS ────────────────────────── */

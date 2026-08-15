@@ -809,7 +809,6 @@ export function BearHeartSticker({ size = 80, animate = true }: { size?: number;
   );
 }
 
-// ─── Sticker Renderer (central lookup) ───────────────────────────────────────
 const STICKER_COMPONENTS: Record<string, React.FC<{ size?: number; animate?: boolean }>> = {
   'sparkle-heart': SparkleHeartSticker,
   'golden-bow-heart': GoldenBowHeartSticker,
@@ -827,8 +826,42 @@ const STICKER_COMPONENTS: Record<string, React.FC<{ size?: number; animate?: boo
   'bear-heart': BearHeartSticker,
 };
 
+const NAME_TO_ID: Record<string, string> = {
+  'sparkle-heart': 'sparkle-heart',
+  'sparkle heart': 'sparkle-heart',
+  'golden-bow-heart': 'golden-bow-heart',
+  'golden heart': 'golden-bow-heart',
+  'love-letter': 'love-letter',
+  'love letter': 'love-letter',
+  'cupids-arrow': 'cupids-arrow',
+  "cupid's arrow": 'cupids-arrow',
+  'cupids arrow': 'cupids-arrow',
+  'birthday-cake': 'birthday-cake',
+  'birthday cake': 'birthday-cake',
+  'teddy-hug': 'teddy-hug',
+  'teddy hug': 'teddy-hug',
+  'balloon-bear': 'balloon-bear',
+  'balloon bear': 'balloon-bear',
+  'cute-kitten': 'cute-kitten',
+  'cute kitten': 'cute-kitten',
+  'crimson-rose': 'crimson-rose',
+  'crimson rose': 'crimson-rose',
+  'ribbon-heart': 'ribbon-heart',
+  'ribbon heart': 'ribbon-heart',
+  'playful-pug': 'playful-pug',
+  'playful pug': 'playful-pug',
+  'love-potion': 'love-potion',
+  'love potion': 'love-potion',
+  'champagne-toast': 'champagne-toast',
+  'champagne toast': 'champagne-toast',
+  'bear-heart': 'bear-heart',
+  'bear heart': 'bear-heart',
+};
+
 export function StickerRenderer({ id, size = 80, animate = true }: { id: string; size?: number; animate?: boolean }) {
-  const Component = STICKER_COMPONENTS[id];
-  if (!Component) return <span style={{ fontSize: size * 0.5 }}>✨</span>;
+  const normalizedId = (id || '').toLowerCase().trim();
+  const resolvedId = NAME_TO_ID[normalizedId] || normalizedId;
+  const Component = STICKER_COMPONENTS[resolvedId];
+  if (!Component) return <span style={{ fontSize: size * 0.5 }}>{id || '✨'}</span>;
   return <Component size={size} animate={animate} />;
 }

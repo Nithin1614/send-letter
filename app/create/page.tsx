@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { StickerRenderer } from '@/app/components/StickerArt';
 import { TEMPLATE_PRESETS, QUICK_PILLS_DATA } from '@/lib/templates';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -93,50 +92,7 @@ const ENVELOPE_STYLES: Record<string, { bodyColor: string; sealColor: string; se
   'Emerald Mystic':    { bodyColor: 'linear-gradient(135deg, #092615 0%, #031208 100%)', sealColor: 'radial-gradient(circle at 38% 32%, #fcd34d, #78350f)', sealIcon: '✨' },
 };
 
-// ─── Songs ────────────────────────────────────────────────────────────────────
-const POPULAR_SONGS = [
-  { id: 'perfect',       art: '💿', name: 'Perfect',          artist: 'Ed Sheeran' },
-  { id: 'all-of-me',    art: '❤️', name: 'All of Me',        artist: 'John Legend' },
-  { id: 'at-last',      art: '🎵', name: 'At Last',           artist: 'Etta James' },
-  { id: 'thinking-out', art: '🎶', name: 'Thinking Out Loud', artist: 'Ed Sheeran' },
-];
 
-// ─── Quick pill presets ───────────────────────────────────────────────────────
-const QUICK_PILLS: { label: string; title: string }[] = [
-  { label: 'Miss you',     title: 'Open when you miss me' },
-  { label: 'Sad day',     title: "Open when you're having a bad day" },
-  { label: 'Anniversary', title: 'Open on our anniversary' },
-];
-
-interface StickerItem {
-  id: string;
-  name: string;
-  isFree: boolean;
-  price?: string;
-  emoji: string;
-  animType: 'wiggle' | 'pulse' | 'float';
-}
-
-const STICKERS_SUITE: { free: StickerItem[]; premium: StickerItem[] } = {
-  free: [
-    { id: 'sparkle-heart',   name: 'Sparkle Heart',  isFree: true, emoji: '💖', animType: 'pulse' },
-    { id: 'golden-bow-heart',name: 'Golden Heart',   isFree: true, emoji: '💝', animType: 'pulse' },
-    { id: 'love-letter',     name: 'Love Letter',    isFree: true, emoji: '💌', animType: 'wiggle' },
-    { id: 'cupids-arrow',    name: "Cupid's Arrow",  isFree: true, emoji: '🏹', animType: 'float' },
-    { id: 'birthday-cake',   name: 'Birthday Cake',  isFree: true, emoji: '🎂', animType: 'pulse' },
-    { id: 'teddy-hug',       name: 'Teddy Hug',      isFree: true, emoji: '🧸', animType: 'wiggle' },
-  ],
-  premium: [
-    { id: 'balloon-bear',   name: 'Balloon Bear',   isFree: false, price: '$0.99', emoji: '🎈🧸', animType: 'float' },
-    { id: 'cute-kitten',    name: 'Cute Kitten',    isFree: false, price: '$0.99', emoji: '🐱💖', animType: 'wiggle' },
-    { id: 'crimson-rose',   name: 'Crimson Rose',   isFree: false, price: '$0.99', emoji: '🌹',   animType: 'pulse' },
-    { id: 'ribbon-heart',   name: 'Ribbon Heart',   isFree: false, price: '$0.99', emoji: '💝',   animType: 'pulse' },
-    { id: 'playful-pug',    name: 'Playful Pug',    isFree: false, price: '$0.99', emoji: '🐶😍', animType: 'wiggle' },
-    { id: 'love-potion',    name: 'Love Potion',    isFree: false, price: '$0.99', emoji: '🧪💕', animType: 'float' },
-    { id: 'champagne-toast',name: 'Champagne Toast',isFree: false, price: '$0.99', emoji: '🥂✨', animType: 'pulse' },
-    { id: 'bear-heart',     name: 'Bear Heart',     isFree: false, price: '$0.99', emoji: '🧸❤️', animType: 'wiggle' },
-  ],
-};
 
 // ─── Accordion section ────────────────────────────────────────────────────────
 function Section({
@@ -145,6 +101,7 @@ function Section({
   title,
   subtitle,
   defaultOpen = false,
+  nonCollapsible = false,
   children,
 }: {
   icon: React.ReactNode;
@@ -152,16 +109,21 @@ function Section({
   title: string;
   subtitle: string;
   defaultOpen?: boolean;
+  nonCollapsible?: boolean;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(nonCollapsible ? true : defaultOpen);
+  const isOpen = nonCollapsible ? true : open;
+
   return (
     <div className="composer-section">
-      <button
-        type="button"
+      <div
         className="composer-section-header"
-        onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
+        onClick={() => {
+          if (!nonCollapsible) setOpen(o => !o);
+        }}
+        style={{ cursor: nonCollapsible ? 'default' : 'pointer' }}
+        aria-expanded={isOpen}
       >
         <div className="composer-section-left">
           <span className={`composer-section-icon ${iconClass || ''}`}>{icon}</span>
@@ -170,24 +132,26 @@ function Section({
             <div className="composer-section-subtitle">{subtitle}</div>
           </div>
         </div>
-        <span
-          className="composer-section-chevron"
-          style={{
-            transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            opacity: 0.6,
-            fontSize: 13,
-            display: 'inline-block',
-          }}
-        >
-          ∨
-        </span>
-      </button>
+        {!nonCollapsible && (
+          <span
+            className="composer-section-chevron"
+            style={{
+              transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              opacity: 0.6,
+              fontSize: 13,
+              display: 'inline-block',
+            }}
+          >
+            ∨
+          </span>
+        )}
+      </div>
 
       <div
         style={{
           display: 'grid',
-          gridTemplateRows: open ? '1fr' : '0fr',
+          gridTemplateRows: isOpen ? '1fr' : '0fr',
           transition: 'grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
@@ -1184,28 +1148,675 @@ interface iTunesSong {
   previewUrl?: string;
 }
 
+const CURATED_POPULAR_PICKS: iTunesSong[] = [
+  {
+    trackId: 1176065071,
+    trackName: 'Chirunama Thana Chirunama',
+    artistName: 'Yazin Nizar & Karimulla',
+    collectionName: 'Ekkadiki Pothavu Chinnavada',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/8e/25/b5/8e25b558-b7e6-e824-414c-b54a4014f65f/cover.jpg/100x100bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/f7/0f/47/f70f47f5-fcd7-2f0d-2969-b198fc67f3d4/mzaf_3414447984203533742.plus.aac.p.m4a',
+  },
+  {
+    trackId: 1604613637,
+    trackName: 'Vesane O Nicchena',
+    artistName: 'Kapil Kapilan & Sameera Bharadwaj',
+    collectionName: 'Rowdy Boys',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/49/0d/57/490d57b2-6e41-77cd-eddc-f08b834d280e/cover.jpg/100x100bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/8e/3c/a5/8e3ca572-6226-9bde-da25-324feaf9a626/mzaf_11537944106324637192.plus.aac.p.m4a',
+  },
+  {
+    trackId: 1445949267,
+    trackName: 'Sunflower',
+    artistName: 'Post Malone & Swae Lee',
+    collectionName: 'Spider-Man: Into the Spider-Verse',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/4b/30/2c/4b302cb6-7a14-5464-4e97-0577e9d0be49/18UMGIM82277.rgb.jpg/100x100bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/98/f0/d6/98f0d67e-f8bf-762d-cac7-1c6b3b6b35dd/mzaf_4543283896248560946.plus.aac.p.m4a',
+  },
+  {
+    trackId: 1842957386,
+    trackName: 'Loser',
+    artistName: 'Tame Impala',
+    collectionName: 'Loser - Single',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/57/6f/a2/576fa272-91c5-658d-9d05-88d9787c0f1d/196873662978.jpg/100x100bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/4c/fd/bc/4cfdbc05-8385-dcca-13d7-c15b0b81d644/mzaf_343675252092765252.plus.aac.p.m4a',
+  },
+  {
+    trackId: 293521573,
+    trackName: "Ain't No Sunshine",
+    artistName: 'Bill Withers',
+    collectionName: 'Just As I Am',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1b/b9/16/1bb9167c-e0eb-5418-960d-e9adb61d0fdd/mzi.kqpazwnw.jpg/100x100bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/c1/97/a5/c197a504-bc13-0709-3f6f-904026c782dd/mzaf_11719507637175591282.plus.aac.p.m4a',
+  },
+];
+
+// ─── Luxury Intuitive Date & Time Picker ──────────────────────────────────────
+function IntuitiveLetterDatePicker({
+  value,
+  onChange,
+  helperText,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  helperText?: string;
+}) {
+  const MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+  const parsed = value ? new Date(value) : null;
+  const isValidDate = parsed && !isNaN(parsed.getTime());
+  const now = new Date();
+
+  const [viewYear, setViewYear] = useState<number>(() => isValidDate ? parsed.getFullYear() : now.getFullYear());
+  const [viewMonth, setViewMonth] = useState<number>(() => isValidDate ? parsed.getMonth() : now.getMonth());
+  const [selectedDay, setSelectedDay] = useState<number | null>(() => isValidDate ? parsed.getDate() : null);
+
+  const initialH24 = isValidDate ? parsed.getHours() : 8;
+  const [hour12, setHour12] = useState<number>(() => (initialH24 % 12 || 12));
+  const [minute, setMinute] = useState<number>(() => isValidDate ? parsed.getMinutes() : 0);
+  const [ampm, setAmpm] = useState<'AM' | 'PM'>(() => (initialH24 >= 12 ? 'PM' : 'AM'));
+
+  // Sync state if external value changes
+  useEffect(() => {
+    if (value) {
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        setViewYear(d.getFullYear());
+        setViewMonth(d.getMonth());
+        setSelectedDay(d.getDate());
+        const h = d.getHours();
+        setHour12(h % 12 || 12);
+        setMinute(d.getMinutes());
+        setAmpm(h >= 12 ? 'PM' : 'AM');
+      }
+    }
+  }, [value]);
+
+  function emit(y: number, m: number, d: number, h: number, min: number, mer: 'AM' | 'PM') {
+    const h24 = mer === 'PM' ? (h % 12) + 12 : h % 12;
+    const targetDate = new Date(y, m, d, h24, min, 0);
+    onChange(targetDate.toISOString());
+  }
+
+  function handleDaySelect(d: number) {
+    setSelectedDay(d);
+    emit(viewYear, viewMonth, d, hour12, minute, ampm);
+  }
+
+  function handleTimePreset(h: number, min: number, mer: 'AM' | 'PM') {
+    setHour12(h);
+    setMinute(min);
+    setAmpm(mer);
+    const targetDay = selectedDay || (now.getDate() + 1);
+    setSelectedDay(targetDay);
+    emit(viewYear, viewMonth, targetDay, h, min, mer);
+  }
+
+  function handleQuickPreset(daysAhead: number, h: number, min: number, mer: 'AM' | 'PM') {
+    const target = new Date();
+    target.setDate(target.getDate() + daysAhead);
+    setViewYear(target.getFullYear());
+    setViewMonth(target.getMonth());
+    setSelectedDay(target.getDate());
+    setHour12(h);
+    setMinute(min);
+    setAmpm(mer);
+    emit(target.getFullYear(), target.getMonth(), target.getDate(), h, min, mer);
+  }
+
+  function handlePrevMonth() {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear(y => y - 1);
+    } else {
+      setViewMonth(m => m - 1);
+    }
+  }
+
+  function handleNextMonth() {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear(y => y + 1);
+    } else {
+      setViewMonth(m => m + 1);
+    }
+  }
+
+  // Calendar calculations
+  const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
+  const totalDaysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+  // Relative preview & past-date detection
+  let relativeSummary: { formatted: string; relative: string; isPast: boolean } | null = null;
+  if (value) {
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) {
+      const diffMs = d.getTime() - Date.now();
+      const isPast = diffMs <= 0;
+      const absDiffSecs = Math.max(0, Math.floor(Math.abs(diffMs) / 1000));
+      const diffHours = Math.floor(absDiffSecs / 3600);
+      const diffMins = Math.floor((absDiffSecs % 3600) / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      const formatted = d.toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true
+      });
+
+      let relative = "";
+      if (isPast) {
+        relative = "⚠️ Cannot select a past date & time";
+      } else if (diffDays >= 1) {
+        relative = `in ${diffDays} day${diffDays === 1 ? '' : 's'} (${diffHours} hrs)`;
+      } else if (diffHours >= 1) {
+        relative = `in ${diffHours}h ${diffMins}m`;
+      } else {
+        relative = `in ${diffMins}m`;
+      }
+      relativeSummary = { formatted, relative, isPast };
+    }
+  }
+
+  return (
+    <div style={{
+      background: 'rgba(16, 6, 11, 0.88)',
+      border: '1.5px solid rgba(212, 165, 116, 0.28)',
+      borderRadius: 14,
+      padding: '16px',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.45)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      marginTop: 8,
+    }}>
+      {/* ── 1-Tap Quick Presets ── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        flexWrap: 'wrap',
+      }}>
+        <span style={{
+          fontFamily: "'Crimson Pro', serif",
+          fontSize: 12,
+          color: '#d4a574',
+          fontWeight: 700,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          marginRight: 2,
+        }}>
+          ✦ Quick:
+        </span>
+        {[
+          { label: '🌅 Tomorrow 8 AM', days: 1, h: 8, min: 0, ampm: 'AM' as const },
+          { label: '🌙 Weekend (Sat 9 AM)', days: ((6 - now.getDay() + 7) % 7) || 7, h: 9, min: 0, ampm: 'AM' as const },
+          { label: '💌 In 1 Week', days: 7, h: 9, min: 0, ampm: 'AM' as const },
+          { label: '🎂 In 1 Month', days: 30, h: 9, min: 0, ampm: 'AM' as const },
+        ].map(p => (
+          <button
+            key={p.label}
+            type="button"
+            onClick={() => handleQuickPreset(p.days, p.h, p.min, p.ampm)}
+            style={{
+              padding: '5px 11px',
+              borderRadius: 20,
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(212, 165, 116, 0.22)',
+              color: 'rgba(250, 248, 245, 0.85)',
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: 12.5,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(212, 165, 116, 0.18)';
+              e.currentTarget.style.borderColor = '#d4a574';
+              e.currentTarget.style.color = '#d4a574';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              e.currentTarget.style.borderColor = 'rgba(212, 165, 116, 0.22)';
+              e.currentTarget.style.color = 'rgba(250, 248, 245, 0.85)';
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── 2-Column Compact Interactive Grid ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gap: 14,
+        alignItems: 'start',
+      }}>
+        {/* Left: Compact Visual Mini-Calendar */}
+        <div style={{
+          background: 'rgba(10, 4, 8, 0.65)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          borderRadius: 10,
+          padding: '12px',
+        }}>
+          {/* Month / Year Navigator */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+          }}>
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(212, 165, 116, 0.2)',
+                color: '#d4a574',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+              }}
+              title="Previous Month"
+            >
+              ‹
+            </button>
+
+            <div style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: 15,
+              fontWeight: 600,
+              color: '#faf8f5',
+            }}>
+              {MONTHS[viewMonth]} {viewYear}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(212, 165, 116, 0.2)',
+                color: '#d4a574',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+              }}
+              title="Next Month"
+            >
+              ›
+            </button>
+          </div>
+
+          {/* Weekday headers */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            textAlign: 'center',
+            marginBottom: 6,
+          }}>
+            {WEEKDAYS.map(w => (
+              <div key={w} style={{
+                fontFamily: "'Crimson Pro', serif",
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'rgba(212, 165, 116, 0.6)',
+              }}>
+                {w}
+              </div>
+            ))}
+          </div>
+
+          {/* Days Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '3px 2px',
+          }}>
+            {Array.from({ length: firstDayIndex }).map((_, i) => (
+              <div key={`blank-${i}`} style={{ height: 28 }} />
+            ))}
+
+            {Array.from({ length: totalDaysInMonth }).map((_, i) => {
+              const dayNum = i + 1;
+              const isSelected = selectedDay === dayNum && parsed?.getMonth() === viewMonth && parsed?.getFullYear() === viewYear;
+              const isToday = now.getFullYear() === viewYear && now.getMonth() === viewMonth && now.getDate() === dayNum;
+              const isPast = new Date(viewYear, viewMonth, dayNum, 23, 59, 59).getTime() < now.getTime();
+
+              return (
+                <button
+                  key={`day-${dayNum}`}
+                  type="button"
+                  onClick={() => !isPast && handleDaySelect(dayNum)}
+                  disabled={isPast}
+                  style={{
+                    height: 28,
+                    borderRadius: '50%',
+                    border: isSelected
+                      ? '1px solid #ffd700'
+                      : isToday
+                      ? '1px solid rgba(212, 165, 116, 0.6)'
+                      : '1px solid transparent',
+                    background: isSelected
+                      ? 'radial-gradient(circle at 35% 30%, #c41e3a 0%, #761822 100%)'
+                      : 'transparent',
+                    color: isPast
+                      ? 'rgba(255, 255, 255, 0.15)'
+                      : isSelected
+                      ? '#ffffff'
+                      : '#faf8f5',
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 13,
+                    fontWeight: isSelected || isToday ? 700 : 500,
+                    cursor: isPast ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: isSelected ? '0 0 10px rgba(196, 30, 58, 0.6)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={e => {
+                    if (!isPast && !isSelected) {
+                      e.currentTarget.style.background = 'rgba(212, 165, 116, 0.18)';
+                      e.currentTarget.style.color = '#d4a574';
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!isPast && !isSelected) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#faf8f5';
+                    }
+                  }}
+                >
+                  {dayNum}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: Time Selector & Precision Spinners */}
+        <div style={{
+          background: 'rgba(10, 4, 8, 0.65)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          borderRadius: 10,
+          padding: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}>
+          <div style={{
+            fontFamily: "'Crimson Pro', serif",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#d4a574',
+          }}>
+            ⏱ Quick Time:
+          </div>
+
+          {/* Quick Time Chips */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            {[
+              { label: '🌅 8:00 AM', h: 8, min: 0, ampm: 'AM' as const },
+              { label: '☀️ 12:00 PM', h: 12, min: 0, ampm: 'PM' as const },
+              { label: '🌇 6:00 PM', h: 6, min: 0, ampm: 'PM' as const },
+              { label: '🌙 11:59 PM', h: 11, min: 59, ampm: 'PM' as const },
+            ].map(t => {
+              const isActive = hour12 === t.h && minute === t.min && ampm === t.ampm;
+              return (
+                <button
+                  key={t.label}
+                  type="button"
+                  onClick={() => handleTimePreset(t.h, t.min, t.ampm)}
+                  style={{
+                    padding: '6px 8px',
+                    borderRadius: 6,
+                    background: isActive ? 'rgba(212, 165, 116, 0.22)' : 'rgba(255, 255, 255, 0.03)',
+                    border: isActive ? '1px solid #d4a574' : '1px solid rgba(255, 255, 255, 0.06)',
+                    color: isActive ? '#d4a574' : 'rgba(250, 248, 245, 0.75)',
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 12.5,
+                    fontWeight: isActive ? 600 : 400,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Time Picker (Hour & Minute) */}
+          <div style={{
+            paddingTop: 8,
+            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+          }}>
+            <div style={{
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: 11,
+              color: 'rgba(250, 248, 245, 0.5)',
+              marginBottom: 6,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+            }}>
+              Custom Time (Hour : Min)
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {/* Hour */}
+              <select
+                value={hour12}
+                onChange={e => {
+                  const h = Number(e.target.value);
+                  setHour12(h);
+                  if (selectedDay) emit(viewYear, viewMonth, selectedDay, h, minute, ampm);
+                }}
+                style={{
+                  background: 'rgba(24, 9, 14, 0.95)',
+                  border: '1px solid rgba(212, 165, 116, 0.35)',
+                  borderRadius: 6,
+                  color: '#faf8f5',
+                  fontFamily: "'Crimson Pro', serif",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  padding: '6px 8px',
+                  flex: 1,
+                  textAlign: 'center',
+                }}
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map(h => (
+                  <option key={h} value={h} style={{ background: '#18080f', color: '#faf8f5' }}>
+                    {String(h).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+
+              <span style={{ color: '#d4a574', fontWeight: 700, fontSize: 16 }}>:</span>
+
+              {/* Minute */}
+              <select
+                value={minute}
+                onChange={e => {
+                  const m = Number(e.target.value);
+                  setMinute(m);
+                  if (selectedDay) emit(viewYear, viewMonth, selectedDay, hour12, m, ampm);
+                }}
+                style={{
+                  background: 'rgba(24, 9, 14, 0.95)',
+                  border: '1px solid rgba(212, 165, 116, 0.35)',
+                  borderRadius: 6,
+                  color: '#faf8f5',
+                  fontFamily: "'Crimson Pro', serif",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  padding: '6px 8px',
+                  flex: 1,
+                  textAlign: 'center',
+                }}
+              >
+                {Array.from({ length: 60 }, (_, i) => i).map(m => (
+                  <option key={m} value={m} style={{ background: '#18080f', color: '#faf8f5' }}>
+                    {String(m).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+
+              {/* AM / PM Toggle */}
+              <div style={{
+                display: 'flex',
+                background: 'rgba(24, 9, 14, 0.95)',
+                border: '1px solid rgba(212, 165, 116, 0.35)',
+                borderRadius: 6,
+                overflow: 'hidden',
+                marginLeft: 4,
+              }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAmpm('AM');
+                    if (selectedDay) emit(viewYear, viewMonth, selectedDay, hour12, minute, 'AM');
+                  }}
+                  style={{
+                    padding: '6px 10px',
+                    border: 'none',
+                    background: ampm === 'AM' ? 'linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)' : 'transparent',
+                    color: ampm === 'AM' ? '#ffffff' : 'rgba(250, 248, 245, 0.5)',
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  AM
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAmpm('PM');
+                    if (selectedDay) emit(viewYear, viewMonth, selectedDay, hour12, minute, 'PM');
+                  }}
+                  style={{
+                    padding: '6px 10px',
+                    border: 'none',
+                    background: ampm === 'PM' ? 'linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)' : 'transparent',
+                    color: ampm === 'PM' ? '#ffffff' : 'rgba(250, 248, 245, 0.5)',
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  PM
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Live Confirmation Preview ── */}
+      {relativeSummary && (
+        <div style={{
+          background: relativeSummary.isPast
+            ? 'linear-gradient(135deg, rgba(224, 32, 56, 0.22), rgba(120, 10, 20, 0.35))'
+            : 'linear-gradient(135deg, rgba(212, 165, 116, 0.12), rgba(139, 32, 32, 0.18))',
+          border: `1px solid ${relativeSummary.isPast ? 'rgba(240, 60, 80, 0.6)' : 'rgba(212, 165, 116, 0.35)'}`,
+          borderRadius: 8,
+          padding: '9px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          animation: 'fadeInSlide 0.2s ease',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 15 }}>{relativeSummary.isPast ? '⚠️' : '✨'}</span>
+            <div style={{
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: 14,
+              color: '#faf8f5',
+              fontWeight: 500,
+            }}>
+              <strong style={{ color: '#ffffff', fontWeight: 600 }}>{relativeSummary.formatted}</strong>
+              <span style={{
+                color: relativeSummary.isPast ? '#ff8090' : '#d4a574',
+                marginLeft: 8,
+                fontWeight: relativeSummary.isPast ? 600 : 400,
+                fontStyle: relativeSummary.isPast ? 'normal' : 'italic',
+                fontSize: 13,
+              }}>
+                ({relativeSummary.relative})
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(250, 248, 245, 0.4)',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontFamily: "'Crimson Pro', serif",
+            }}
+            title="Reset date"
+          >
+            ✕ Reset
+          </button>
+        </div>
+      )}
+
+      {helperText && !relativeSummary && (
+        <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 12.5, color: 'rgba(250, 248, 245, 0.45)', margin: 0 }}>
+          {helperText}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ─── Inner (uses useSearchParams) ─────────────────────────────────────────────
 function CreatePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTitle = searchParams.get('title') || '';
+  const initialMessage = searchParams.get('message') || searchParams.get('prompt') || '';
+  const paramFont = searchParams.get('font');
+  const validFonts: FontOption[] = ['Classic', 'Flowing', 'Elegant', 'Casual', 'Retro', 'Poetic', 'Typewriter', 'Sacramento', 'Parisienne'];
+  const initialFont: FontOption = validFonts.includes(paramFont as FontOption) ? (paramFont as FontOption) : 'Classic';
 
   // Step state
   const [step, setStep] = useState<1 | 2>(1);
 
   // Letter fields
   const [title, setTitle] = useState(initialTitle);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(initialMessage);
   const [signature, setSignature] = useState('');
-  const [font, setFont] = useState<FontOption>('Classic');
+  const [font, setFont] = useState<FontOption>(initialFont);
   const [theme, setTheme] = useState('Classic Burgundy');
+  const [letterTheme, setLetterTheme] = useState('real-paper');
   const [envelope, setEnvelope] = useState('Classic Wax');
-  const [selectedSticker, setSelectedSticker] = useState<StickerItem | null>(null);
-  const [animateSticker, setAnimateSticker] = useState<boolean>(true);
+  const [openingStyle, setOpeningStyle] = useState<'wax-seal' | 'envelope-unfold'>('wax-seal');
   
   // iTunes Music Picker States
   const [selectedSong, setSelectedSong] = useState<iTunesSong | null>(null);
-  const [popularPicks, setPopularPicks] = useState<iTunesSong[]>([]);
+  const [popularPicks, setPopularPicks] = useState<iTunesSong[]>(CURATED_POPULAR_PICKS);
   const [songSearch, setSongSearch] = useState('');
   const [searchResults, setSearchResults] = useState<iTunesSong[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -1214,34 +1825,56 @@ function CreatePageInner() {
 
   const [photoEnabled, setPhotoEnabled] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoCaption, setPhotoCaption] = useState('');
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   // Voice Recording States
   const [voiceDataUrl, setVoiceDataUrl] = useState<string>('');
   const [voiceDuration, setVoiceDuration] = useState<number>(0);
 
-  // Fetch real iTunes popular picks on mount
-  useEffect(() => {
-    async function loadPopularPicks() {
-      try {
-        const res = await fetch('https://itunes.apple.com/search?term=Ed+Sheeran+John+Legend+Adele+Taylor+Swift&media=music&entity=song&limit=5');
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          setPopularPicks(data.results.map((item: any) => ({
-            trackId: item.trackId,
-            trackName: item.trackName,
-            artistName: item.artistName,
-            collectionName: item.collectionName,
-            artworkUrl100: item.artworkUrl100,
-            previewUrl: item.previewUrl,
-          })));
+  // AI Muse Assistant States
+  const [museLoading, setMuseLoading] = useState(false);
+  const [museSuggestion, setMuseSuggestion] = useState('');
+  const [museSuggestedTitle, setMuseSuggestedTitle] = useState('');
+  const [museNotes, setMuseNotes] = useState('');
+  const [museMode, setMuseMode] = useState<'starter' | 'polish' | 'continue'>('starter');
+  const [userHasCustomTitle, setUserHasCustomTitle] = useState(false);
+
+  async function handleCallMuse(action?: 'starter' | 'polish' | 'continue') {
+    const activeAction = action || museMode;
+    setMuseLoading(true);
+    setMuseSuggestion('');
+    try {
+      const res = await fetch('/api/ai/muse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: activeAction,
+          title,
+          currentText: message,
+          notes: museNotes,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.text) {
+        setMuseSuggestion(data.text);
+        if (data.suggestedTitle) {
+          setMuseSuggestedTitle(data.suggestedTitle);
+          // If user hasn't explicitly written a custom title, update to matching AI title
+          if (!userHasCustomTitle || !title.trim()) {
+            setTitle(data.suggestedTitle);
+          }
         }
-      } catch (e) {
-        console.error('Failed to fetch iTunes popular picks', e);
+      } else {
+        setMuseSuggestion(data.error || "Let's focus on writing a meaningful, kind letter.");
       }
+    } catch {
+      setMuseSuggestion('Unable to reach the muse right now. Please try again.');
+    } finally {
+      setMuseLoading(false);
     }
-    loadPopularPicks();
-  }, []);
+  }
 
   // Debounced iTunes Search Effect
   useEffect(() => {
@@ -1302,12 +1935,34 @@ function CreatePageInner() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [lockDate, setLockDate] = useState('');
+  const [replyToId, setReplyToId] = useState<string>('');
+  const [parentLetterTitle, setParentLetterTitle] = useState<string>('');
+
+  // Notification & Delivery Fields
+  const [senderEmail, setSenderEmail] = useState<string>('');
+  const [scheduleDelivery, setScheduleDelivery] = useState<boolean>(false);
+  const [recipientEmail, setRecipientEmail] = useState<string>('');
+  const [scheduledDate, setScheduledDate] = useState<string>('');
 
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const t = searchParams.get('title');
     const templateKey = searchParams.get('template');
+    const rep = searchParams.get('replyTo');
+    if (rep) {
+      setReplyToId(rep);
+      fetch(`/api/letters/${rep}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) {
+            setParentLetterTitle(data.title || 'A Secret Letter');
+            if (!t) setTitle(`Re: ${data.title || 'Your Letter'}`);
+          }
+        })
+        .catch(console.error);
+    }
+
     if (templateKey && TEMPLATE_PRESETS[templateKey]) {
       const preset = TEMPLATE_PRESETS[templateKey];
       setTitle(preset.title);
@@ -1319,31 +1974,75 @@ function CreatePageInner() {
   }, [searchParams]);
 
   async function handleSeal() {
+    // ── Validations ──
+    if (guardianType === 'time') {
+      if (!lockDate) {
+        alert('Please select an unlock date & time for Time Lock.');
+        return;
+      }
+      if (new Date(lockDate).getTime() <= Date.now()) {
+        alert('The unlock date and time cannot be in the past. Please choose a future moment.');
+        return;
+      }
+    }
+
+    if (guardianType === 'question') {
+      if (!question.trim() || !answer.trim()) {
+        alert('Please enter both a secret question and its expected answer.');
+        return;
+      }
+    }
+
+    if (scheduleDelivery) {
+      if (!recipientEmail.trim() || !recipientEmail.includes('@')) {
+        alert("Please enter a valid recipient email address for automated scheduled delivery.");
+        return;
+      }
+      if (!scheduledDate) {
+        alert('Please select a delivery date & time for automated scheduled delivery.');
+        return;
+      }
+      if (new Date(scheduledDate).getTime() <= Date.now()) {
+        alert('The scheduled delivery date and time cannot be in the past. Please choose a future moment.');
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
-      let photoDataUrl = '';
+      let photoPayload = '';
       if (photoEnabled && photoFile) {
-        photoDataUrl = await new Promise<string>((resolve) => {
+        const photoDataUrl = await new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve((reader.result as string) || '');
           reader.readAsDataURL(photoFile);
         });
+        photoPayload = photoCaption.trim()
+          ? JSON.stringify({ url: photoDataUrl, caption: photoCaption.trim() })
+          : photoDataUrl;
       }
 
       const res = await fetch('/api/letters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title, message, signature, font, theme, envelope,
+          title: title.trim() || 'Sealed letter for you',
+          message, signature, font, theme, envelope,
           song: selectedSong ? selectedSong.trackName : '',
           songArtist: selectedSong ? selectedSong.artistName : '',
           songArtwork: selectedSong ? selectedSong.artworkUrl100 : '',
           songPreviewUrl: selectedSong ? selectedSong.previewUrl : '',
-          sticker: selectedSticker ? selectedSticker.name : '',
-          photo: photoDataUrl,
+          photo: photoPayload,
           voiceMessage: voiceDataUrl,
           voiceDuration: voiceDuration,
           guardianType, question, answer, difficulty,
+          unlockAt: guardianType === 'time' ? lockDate : '',
+          openingStyle,
+          letterTheme,
+          replyToId: replyToId || '',
+          senderEmail: senderEmail.trim().replace(/@gma(?:i|il|ill|ial|mil)\.com$/i, '@gmail.com'),
+          recipientEmail: scheduleDelivery ? recipientEmail.trim().replace(/@gma(?:i|il|ill|ial|mil)\.com$/i, '@gmail.com') : '',
+          scheduledFor: scheduleDelivery ? scheduledDate : '',
         }),
       });
       if (!res.ok) throw new Error('Failed');
@@ -1390,8 +2089,28 @@ function CreatePageInner() {
         </div>
         {/* Subtitle below */}
         <div className="create-header-sub">
-          {step === 1 ? 'Write your letter' : 'Guard your words'}
+          {step === 1 ? 'Write your letter' : 'Postman'}
         </div>
+
+        {/* Replying Banner */}
+        {replyToId && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.15), rgba(139, 32, 32, 0.2))',
+            border: '1px solid rgba(212, 165, 116, 0.35)',
+            borderRadius: 12,
+            padding: '10px 16px',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            color: '#d4a574',
+            fontFamily: "'Crimson Pro', serif",
+            fontSize: 15,
+          }}>
+            <span style={{ fontSize: 18 }}>💌</span>
+            <span>Writing a <strong>sealed reply</strong> to letter <code style={{ color: '#faf8f5', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 4 }}>{replyToId}</code></span>
+          </div>
+        )}
 
         {/* ═══════════════════ STEP 1 ═══════════════════ */}
         {step === 1 && (
@@ -1408,35 +2127,23 @@ function CreatePageInner() {
               </Link>
             )}
 
-            {/* Quick pills (Hidden when title is typed) */}
-            {!title.trim() && (
-              <div className="create-quick-pills">
-                {QUICK_PILLS_DATA.map(p => (
-                  <Link
-                    key={p.label}
-                    href={`/open-when/${p.slug}`}
-                    className="create-quick-pill"
-                  >
-                    {p.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* ── Your Message ── */}
+            {/* ── Your Message (Permanently Open) ── */}
             <Section
               icon="📄"
               iconClass="red"
               title="Your Message"
               subtitle="Write something meaningful"
-              defaultOpen
+              nonCollapsible
             >
-              <label className="field-label">Title (optional)</label>
+              <label className="field-label">Letter Title (optional)</label>
               <input
                 className="field-input"
-                placeholder="Open When..."
+                placeholder="e.g. A Secret Note, Happy Birthday (or leave blank for 'Sealed letter for you')"
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => {
+                  setTitle(e.target.value);
+                  setUserHasCustomTitle(Boolean(e.target.value.trim()));
+                }}
               />
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 16 }}>
@@ -1456,6 +2163,300 @@ function CreatePageInner() {
                   style={{ fontFamily: FONT_MAP[font], fontSize: ['Flowing','Casual','Retro','Poetic','Sacramento','Parisienne'].includes(font) ? 20 : 17, lineHeight: 1.75 }}
                 />
               </div>
+
+              {/* ── THE MUSE (AI WRITING ASSISTANT) ── */}
+              <div
+                style={{
+                  marginTop: 14,
+                  marginBottom: 16,
+                  background: 'rgba(22, 10, 16, 0.8)',
+                  border: '1px solid rgba(212, 165, 116, 0.22)',
+                  borderRadius: 10,
+                  padding: '16px 18px',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+                }}
+              >
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: '1rem', color: '#d4a574' }}>✨</span>
+                    <span
+                      style={{
+                        fontFamily: "'Playfair Display', Georgia, serif",
+                        fontSize: '0.95rem',
+                        fontWeight: 700,
+                        color: '#d4a574',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      The Muse (AI Writing Assistant)
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.78rem', color: '#d4a574', fontFamily: "'Crimson Pro', serif", fontStyle: 'italic' }}>
+                    ✦ Click any option below to generate instantly
+                  </span>
+                </div>
+
+                {/* 3 Interactive Mode Tabs */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+                  <button
+                    type="button"
+                    title="Click to generate an opening line instantly"
+                    onClick={() => {
+                      setMuseMode('starter');
+                      handleCallMuse('starter');
+                    }}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 16,
+                      background: museMode === 'starter' ? 'rgba(212, 165, 116, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                      border: museMode === 'starter' ? '1px solid #d4a574' : '1px solid rgba(255, 255, 255, 0.1)',
+                      color: museMode === 'starter' ? '#faf8f5' : 'rgba(250, 248, 245, 0.75)',
+                      fontFamily: "'Crimson Pro', serif",
+                      fontSize: '0.84rem',
+                      fontWeight: museMode === 'starter' ? 600 : 400,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    ✦ Opening line
+                  </button>
+
+                  <button
+                    type="button"
+                    title="Click to polish your words instantly"
+                    onClick={() => {
+                      setMuseMode('polish');
+                      handleCallMuse('polish');
+                    }}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 16,
+                      background: museMode === 'polish' ? 'rgba(212, 165, 116, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                      border: museMode === 'polish' ? '1px solid #d4a574' : '1px solid rgba(255, 255, 255, 0.1)',
+                      color: museMode === 'polish' ? '#faf8f5' : 'rgba(250, 248, 245, 0.75)',
+                      fontFamily: "'Crimson Pro', serif",
+                      fontSize: '0.84rem',
+                      fontWeight: museMode === 'polish' ? 600 : 400,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    ✦ Polish my words
+                  </button>
+
+                  <button
+                    type="button"
+                    title="Click to finish this thought instantly"
+                    onClick={() => {
+                      setMuseMode('continue');
+                      handleCallMuse('continue');
+                    }}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 16,
+                      background: museMode === 'continue' ? 'rgba(212, 165, 116, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                      border: museMode === 'continue' ? '1px solid #d4a574' : '1px solid rgba(255, 255, 255, 0.1)',
+                      color: museMode === 'continue' ? '#faf8f5' : 'rgba(250, 248, 245, 0.75)',
+                      fontFamily: "'Crimson Pro', serif",
+                      fontSize: '0.84rem',
+                      fontWeight: museMode === 'continue' ? 600 : 400,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    ✦ Finish this thought
+                  </button>
+                </div>
+
+                {/* Input Prompt Field with Action Button */}
+                <div style={{ marginBottom: 6 }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: 'rgba(212, 165, 116, 0.85)',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      fontFamily: "'Crimson Pro', serif",
+                    }}
+                  >
+                    Enter Prompt
+                  </label>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'stretch', marginBottom: museLoading || museSuggestion ? 12 : 0 }}>
+                  <input
+                    type="text"
+                    placeholder="What are you trying to say? (e.g. miss our morning walks, so proud of your interview)..."
+                    value={museNotes}
+                    onChange={(e) => setMuseNotes(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleCallMuse();
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '10px 14px',
+                      background: 'rgba(10, 4, 7, 0.75)',
+                      border: '1px solid rgba(212, 165, 116, 0.2)',
+                      borderRadius: 6,
+                      color: '#faf8f5',
+                      fontSize: '0.9rem',
+                      fontFamily: "'Crimson Pro', serif",
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    disabled={museLoading}
+                    onClick={() => handleCallMuse()}
+                    style={{
+                      background: 'linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '0 18px',
+                      fontSize: '0.86rem',
+                      fontWeight: 600,
+                      fontFamily: "'Crimson Pro', serif",
+                      cursor: museLoading ? 'not-allowed' : 'pointer',
+                      opacity: museLoading ? 0.7 : 1,
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      boxShadow: '0 3px 12px rgba(196, 30, 58, 0.3)',
+                    }}
+                  >
+                    {museLoading ? '✦ Writing...' : 'Generate ✦'}
+                  </button>
+                </div>
+
+                {/* Loading State */}
+                {museLoading && (
+                  <div style={{ color: '#d4a574', fontSize: '0.86rem', fontStyle: 'italic', padding: '8px 0 2px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>✨</span> Crafting thoughtful words for your letter...
+                  </div>
+                )}
+
+                {/* Result Card (Dark Mode) */}
+                {museSuggestion && !museLoading && (
+                  <div
+                    style={{
+                      background: 'rgba(14, 6, 11, 0.95)',
+                      border: '1px solid rgba(212, 165, 116, 0.32)',
+                      borderRadius: 8,
+                      padding: '14px 16px',
+                      marginTop: 10,
+                      boxShadow: '0 6px 20px rgba(0, 0, 0, 0.55)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#d4a574', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <span>✦</span> Suggested Draft
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setMuseSuggestion('')}
+                        style={{ background: 'transparent', border: 'none', color: 'rgba(250, 248, 245, 0.45)', fontSize: 12, cursor: 'pointer' }}
+                      >
+                        ✕ Dismiss
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        paddingLeft: 12,
+                        borderLeft: '2px solid rgba(212, 165, 116, 0.4)',
+                        marginBottom: 12,
+                      }}
+                    >
+                      {museSuggestedTitle && (
+                        <div style={{ marginBottom: 6, fontSize: '0.84rem', color: '#d4a574', fontFamily: "'Crimson Pro', serif" }}>
+                          <span style={{ opacity: 0.7, textTransform: 'uppercase', fontSize: '0.72rem', letterSpacing: '0.04em' }}>Title:</span> <strong>“{museSuggestedTitle}”</strong>
+                        </div>
+                      )}
+                      <p style={{ color: '#faf8f5', fontSize: '0.94rem', lineHeight: 1.6, margin: 0, fontFamily: "'Crimson Pro', Georgia, serif", fontStyle: 'italic' }}>
+                        “{museSuggestion}”
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMessage((prev) => (prev ? prev + '\n\n' + museSuggestion : museSuggestion));
+                          if (!title.trim() && museSuggestedTitle) {
+                            setTitle(museSuggestedTitle);
+                          }
+                          setMuseSuggestion('');
+                        }}
+                        style={{
+                          background: 'linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 4,
+                          padding: '6px 14px',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(196, 30, 58, 0.3)',
+                        }}
+                      >
+                        Insert into letter ✦
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMessage(museSuggestion);
+                          if (!title.trim() && museSuggestedTitle) {
+                            setTitle(museSuggestedTitle);
+                          }
+                          setMuseSuggestion('');
+                        }}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(212, 165, 116, 0.25)',
+                          color: '#faf8f5',
+                          borderRadius: 4,
+                          padding: '5px 12px',
+                          fontSize: '0.82rem',
+                          fontFamily: "'Crimson Pro', serif",
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Replace text
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCallMuse()}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#d4a574',
+                          fontSize: '0.82rem',
+                          fontFamily: "'Crimson Pro', serif",
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          marginLeft: 'auto',
+                        }}
+                      >
+                        Try another version ↺
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Fonts Section Label ── */}
+              <label className="field-label" style={{ marginTop: 14, marginBottom: 6 }}>Fonts</label>
 
               {/* Font pills container (single-line horizontal scroll strip) */}
               <div className="font-pills-container">
@@ -1517,7 +2518,14 @@ function CreatePageInner() {
                         <button
                           key={t.name}
                           className={`theme-thumb ${isActive ? 'active' : ''}`}
-                          onClick={() => setTheme(t.name)}
+                          onClick={() => {
+                            setTheme(t.name);
+                            if (t.name === 'Classic Burgundy') setLetterTheme('burgundy-velvet');
+                            else if (t.name === 'Velvet Night' || t.name === 'Midnight Stars') setLetterTheme('oled-dark');
+                            else if (t.name === 'Vintage Parchment') setLetterTheme('vintage-brown');
+                            else if (t.name === 'Soft Paper' || t.name === 'Linen') setLetterTheme('real-paper');
+                            else if (t.name === 'Sunset') setLetterTheme('ivory');
+                          }}
                           title={t.name}
                           style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
                         >
@@ -1794,176 +2802,122 @@ function CreatePageInner() {
               </div>
             </Section>
 
-            {/* ── Add a Sticker Section ── */}
+            {/* ── Letter Opening Sequence ── */}
             <Section
-              icon={
-                selectedSticker ? (
-                  <div style={{
-                    width: 38, height: 38, borderRadius: 10, background: '#ffffff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)', overflow: 'hidden',
-                  }}>
-                    <StickerRenderer id={selectedSticker.id} size={34} animate={false} />
-                  </div>
-                ) : "✨"
-              }
-              iconClass={selectedSticker ? "" : "yellow"}
-              title="Sticker"
-              subtitle={selectedSticker ? `${selectedSticker.name} selected` : 'A little character for your letter (optional)'}
+              icon="🎬"
+              iconClass=""
+              title="Opening Sequence"
+              subtitle={openingStyle === 'wax-seal' ? 'Wax Seal — Hold to break' : 'Envelope Unfold — Tap to open'}
             >
-              {/* If a sticker is selected, show Animate Sticker toggle & Live Preview (Screenshot 10) */}
-              {selectedSticker && (
-                <div style={{
-                  background: 'rgba(12, 4, 8, 0.65)',
-                  border: '1px solid rgba(85, 28, 35, 0.4)',
-                  borderRadius: 12, padding: '16px 20px',
-                  marginBottom: 16,
-                }}>
-                  {/* Animate Sticker Toggle Row */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <span style={{
-                      fontFamily: "'Crimson Pro', serif", fontSize: 14.5, color: 'rgba(250,248,245,0.85)',
-                      display: 'flex', alignItems: 'center', gap: 6,
-                    }}>
-                      <span style={{ fontSize: 12, color: '#d4a574' }}>▶</span> Animate sticker
-                    </span>
-                    <button
-                      onClick={() => setAnimateSticker(a => !a)}
-                      style={{
-                        width: 44, height: 24, borderRadius: 9999,
-                        background: animateSticker ? '#f59e0b' : 'rgba(255,255,255,0.15)',
-                        border: 'none', cursor: 'pointer', position: 'relative',
-                        transition: 'background 0.2s ease', outline: 'none',
-                      }}
-                    >
-                      <div style={{
-                        width: 18, height: 18, borderRadius: '50%', background: '#ffffff',
-                        position: 'absolute', top: 3,
-                        left: animateSticker ? 23 : 3,
-                        transition: 'left 0.2s ease',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }} />
-                    </button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {/* Wax Seal Option */}
+                <button
+                  type="button"
+                  onClick={() => setOpeningStyle('wax-seal')}
+                  style={{
+                    background: openingStyle === 'wax-seal' ? 'rgba(212, 165, 116, 0.12)' : 'rgba(12, 4, 8, 0.5)',
+                    border: `1.5px solid ${openingStyle === 'wax-seal' ? '#d4a574' : 'rgba(85, 28, 35, 0.35)'}`,
+                    borderRadius: 12,
+                    padding: '20px 16px',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.25s ease',
+                  }}
+                >
+                  <div style={{
+                    width: 56, height: 56, borderRadius: '50%',
+                    background: 'radial-gradient(circle at 38% 32%, #e0303a, #8b2020 60%, #5c1616)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 24, margin: '0 auto 12px',
+                    boxShadow: openingStyle === 'wax-seal' ? '0 0 20px rgba(228,32,56,0.4)' : '0 4px 12px rgba(0,0,0,0.4)',
+                    border: '2px solid rgba(255,255,255,0.15)',
+                  }}>
+                    ❤️
                   </div>
+                  <div style={{
+                    fontFamily: "'Crimson Pro', Georgia, serif",
+                    fontSize: 14.5,
+                    fontWeight: 600,
+                    color: openingStyle === 'wax-seal' ? '#d4a574' : 'rgba(250,248,245,0.85)',
+                    marginBottom: 4,
+                  }}>
+                    Wax Seal
+                  </div>
+                  <div style={{
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 12,
+                    color: 'rgba(250,248,245,0.5)',
+                    lineHeight: 1.3,
+                  }}>
+                    Press & hold to break the seal
+                  </div>
+                  {openingStyle === 'wax-seal' && (
+                    <div style={{ marginTop: 8, color: '#d4a574', fontSize: 13, fontWeight: 'bold' }}>✓ Selected</div>
+                  )}
+                </button>
 
-                  {/* Centered Sticker Preview Box */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                {/* Envelope Unfold Option */}
+                <button
+                  type="button"
+                  onClick={() => setOpeningStyle('envelope-unfold')}
+                  style={{
+                    background: openingStyle === 'envelope-unfold' ? 'rgba(212, 165, 116, 0.12)' : 'rgba(12, 4, 8, 0.5)',
+                    border: `1.5px solid ${openingStyle === 'envelope-unfold' ? '#d4a574' : 'rgba(85, 28, 35, 0.35)'}`,
+                    borderRadius: 12,
+                    padding: '20px 16px',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.25s ease',
+                  }}
+                >
+                  <div style={{
+                    width: 56, height: 40, borderRadius: 4,
+                    background: '#d1bfae',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '8px auto 20px',
+                    boxShadow: openingStyle === 'envelope-unfold' ? '0 0 20px rgba(209,191,174,0.3)' : '0 4px 12px rgba(0,0,0,0.4)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}>
+                    {/* Mini envelope flap */}
                     <div style={{
-                      width: 120, height: 120, borderRadius: 20,
-                      background: '#0a0108',
-                      boxShadow: '0 8px 28px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.06)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <StickerRenderer id={selectedSticker.id} size={88} animate={animateSticker} />
-                    </div>
-                    <span style={{ fontSize: 11.5, color: 'rgba(250,248,245,0.4)', fontFamily: "'Crimson Pro', serif", fontStyle: 'italic' }}>
-                      Preview — how recipient will see it
-                    </span>
+                      position: 'absolute',
+                      top: 0, left: 0,
+                      width: 0, height: 0,
+                      borderLeft: '28px solid transparent',
+                      borderRight: '28px solid transparent',
+                      borderTop: '20px solid #f2dfcc',
+                    }} />
+                    {/* Mini letter inside */}
+                    <div style={{
+                      width: '80%', height: '75%',
+                      background: '#f7f1e3',
+                      borderRadius: 2,
+                      position: 'relative',
+                      zIndex: 1,
+                    }} />
                   </div>
-                </div>
-              )}
-
-              {/* Promo Banner: Create Our Sticker */}
-              <div style={{
-                background: 'rgba(28, 12, 16, 0.5)',
-                border: '1px solid rgba(135, 45, 55, 0.35)',
-                borderRadius: 10, padding: '12px 16px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginBottom: 14,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 18, color: '#d4a574' }}>✦</span>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: 14, color: '#faf8f5', fontWeight: 600 }}>Create Our Sticker</span>
-                      <span style={{ fontSize: 9, background: 'rgba(212,165,116,0.2)', border: '1px solid rgba(212,165,116,0.4)', color: '#d4a574', padding: '1px 5px', borderRadius: 4 }}>NEW</span>
-                    </div>
-                    <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: 12, color: 'rgba(250,248,245,0.45)' }}>
-                      Turn your photo into a whimsical sticker
-                    </div>
+                  <div style={{
+                    fontFamily: "'Crimson Pro', Georgia, serif",
+                    fontSize: 14.5,
+                    fontWeight: 600,
+                    color: openingStyle === 'envelope-unfold' ? '#d4a574' : 'rgba(250,248,245,0.85)',
+                    marginBottom: 4,
+                  }}>
+                    Envelope Unfold
                   </div>
-                </div>
-                <span style={{ fontSize: 16, color: 'rgba(250,248,245,0.3)', cursor: 'pointer' }}>♡</span>
-              </div>
-
-              {/* No Sticker Button */}
-              <button
-                onClick={() => setSelectedSticker(null)}
-                style={{
-                  width: '100%', padding: '10px 0',
-                  background: 'rgba(14, 5, 8, 0.65)',
-                  border: !selectedSticker ? '1.5px solid #d4a574' : '1px solid rgba(85, 28, 35, 0.35)',
-                  borderRadius: 10, color: !selectedSticker ? '#d4a574' : 'rgba(250,248,245,0.6)',
-                  fontFamily: "'Crimson Pro', serif", fontSize: 13.5,
-                  cursor: 'pointer', outline: 'none', marginBottom: 16,
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                No sticker
-              </button>
-
-              {/* FREE Category Grid (Screenshot 9) */}
-              <div style={{ fontSize: 11, letterSpacing: '0.12em', color: '#d4a574', fontFamily: "'Crimson Pro', serif", fontWeight: 700, marginBottom: 10, textTransform: 'uppercase' }}>
-                FREE
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
-                {STICKERS_SUITE.free.map(s => {
-                  const isSel = selectedSticker?.id === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => setSelectedSticker(isSel ? null : s)}
-                      style={{
-                        height: 100, borderRadius: 14,
-                        background: isSel ? 'rgba(80, 20, 30, 0.7)' : 'rgba(18, 6, 10, 0.7)',
-                        border: isSel ? '2px solid #e03045' : '1px solid rgba(85, 28, 35, 0.35)',
-                        cursor: 'pointer', outline: 'none',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        transition: 'all 0.2s ease',
-                        boxShadow: isSel ? '0 0 18px rgba(224,48,69,0.45)' : 'none',
-                        padding: 4,
-                      }}
-                    >
-                      <StickerRenderer id={s.id} size={72} animate={isSel && animateSticker} />
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* PREMIUM Category Grid (Screenshot 9) */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <span style={{ fontSize: 11, letterSpacing: '0.12em', color: '#d4a574', fontFamily: "'Crimson Pro', serif", fontWeight: 700, textTransform: 'uppercase' }}>
-                  PREMIUM
-                </span>
-                <span style={{ fontSize: 10.5, background: 'rgba(35, 20, 5, 0.7)', border: '1px solid rgba(212,165,116,0.35)', color: '#d4a574', padding: '3px 8px', borderRadius: 9999, fontFamily: "'Crimson Pro', serif" }}>
-                  All 18 for $2.99
-                </span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-                {STICKERS_SUITE.premium.map(s => {
-                  const isSel = selectedSticker?.id === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => setSelectedSticker(isSel ? null : s)}
-                      style={{
-                        height: 106, borderRadius: 14,
-                        background: isSel ? 'rgba(80, 20, 30, 0.7)' : 'rgba(18, 6, 10, 0.7)',
-                        border: isSel ? '2px solid #e03045' : '1px solid rgba(85, 28, 35, 0.35)',
-                        cursor: 'pointer', outline: 'none',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        gap: 4, position: 'relative', transition: 'all 0.2s ease',
-                        boxShadow: isSel ? '0 0 18px rgba(224,48,69,0.45)' : 'none',
-                        padding: 4,
-                      }}
-                    >
-                      <StickerRenderer id={s.id} size={72} animate={isSel && animateSticker} />
-                      <span style={{ fontSize: 9.5, background: 'rgba(0,0,0,0.55)', color: '#d4a574', padding: '1px 7px', borderRadius: 6, fontFamily: "'Crimson Pro', serif", marginTop: -2 }}>
-                        {s.price}
-                      </span>
-                    </button>
-                  );
-                })}
+                  <div style={{
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 12,
+                    color: 'rgba(250,248,245,0.5)',
+                    lineHeight: 1.3,
+                  }}>
+                    Tap to open the envelope
+                  </div>
+                  {openingStyle === 'envelope-unfold' && (
+                    <div style={{ marginTop: 8, color: '#d4a574', fontSize: 13, fontWeight: 'bold' }}>✓ Selected</div>
+                  )}
+                </button>
               </div>
             </Section>
 
@@ -1977,40 +2931,340 @@ function CreatePageInner() {
               <div className="toggle-pill" style={{ marginBottom: 14 }}>
                 <button
                   className={`toggle-option ${!photoEnabled ? 'selected' : ''}`}
-                  onClick={() => { setPhotoEnabled(false); setPhotoFile(null); }}
+                  onClick={() => {
+                    setPhotoEnabled(false);
+                    setPhotoFile(null);
+                    setPhotoPreviewUrl(null);
+                    setPhotoCaption('');
+                  }}
                 >
                   No photo
                 </button>
                 <button
                   className={`toggle-option ${photoEnabled ? 'selected' : ''}`}
-                  onClick={() => { setPhotoEnabled(true); photoInputRef.current?.click(); }}
+                  onClick={() => {
+                    setPhotoEnabled(true);
+                    photoInputRef.current?.click();
+                  }}
                 >
                   Attach photo
                 </button>
               </div>
 
               {photoEnabled && (
-                <div
-                  className="upload-zone"
-                  onClick={() => photoInputRef.current?.click()}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={e => {
-                      if (e.target.files?.[0]) {
-                        setPhotoFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                  <div className="upload-zone-icon">📷</div>
-                  <div className="upload-zone-title">
-                    {photoFile ? photoFile.name : 'Choose a photo'}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* 1. Upload Drop Zone / Active File Pill */}
+                  {!photoPreviewUrl ? (
+                    <div
+                      className="upload-zone"
+                      onClick={() => photoInputRef.current?.click()}
+                      style={{
+                        cursor: 'pointer',
+                        padding: '24px 16px',
+                        background: 'rgba(14, 5, 10, 0.55)',
+                        border: '1.5px dashed rgba(212, 165, 116, 0.35)',
+                        borderRadius: 14,
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <input
+                        ref={photoInputRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setPhotoFile(file);
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setPhotoPreviewUrl(ev.target?.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <div style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: "50%",
+                        background: "rgba(212,165,116,0.12)",
+                        border: "1px solid rgba(212,165,116,0.25)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 20,
+                        margin: "0 auto 10px",
+                      }}>
+                        📷
+                      </div>
+                      <div style={{ fontSize: 14.5, fontWeight: 600, color: "#faf8f5", marginBottom: 4 }}>
+                        Choose a photo from your device
+                      </div>
+                      <div style={{ fontSize: 12, color: "rgba(250,248,245,0.5)" }}>
+                        JPEG, PNG, or WebP · Max 5MB
+                      </div>
+                    </div>
+                  ) : (
+                    /* Active File Bar */
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      background: "rgba(18, 8, 14, 0.8)",
+                      border: "1px solid rgba(212, 165, 116, 0.3)",
+                      borderRadius: 12,
+                      padding: "10px 14px",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, overflow: "hidden" }}>
+                        <input
+                          ref={photoInputRef}
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setPhotoFile(file);
+                              const reader = new FileReader();
+                              reader.onload = (ev) => {
+                                setPhotoPreviewUrl(ev.target?.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        {/* Mini Thumbnail */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photoPreviewUrl}
+                          alt="Thumbnail"
+                          style={{
+                            width: 38,
+                            height: 38,
+                            objectFit: "cover",
+                            borderRadius: 6,
+                            border: "1px solid rgba(212,165,116,0.3)",
+                          }}
+                        />
+                        <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ fontSize: 13.5, fontWeight: 600, color: "#faf8f5", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {photoFile?.name || "Photo attached"}
+                          </div>
+                          <div style={{ fontSize: 11, color: "#5ae08a" }}>
+                            ✓ Ready to seal inside letter
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <button
+                          type="button"
+                          onClick={() => photoInputRef.current?.click()}
+                          style={{
+                            background: "rgba(212,165,116,0.12)",
+                            border: "1px solid rgba(212,165,116,0.25)",
+                            color: "#d4a574",
+                            borderRadius: 6,
+                            padding: "5px 10px",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Change
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPhotoFile(null);
+                            setPhotoPreviewUrl(null);
+                          }}
+                          style={{
+                            background: "rgba(255,255,255,0.06)",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            color: "rgba(250,248,245,0.6)",
+                            borderRadius: 6,
+                            padding: "5px 8px",
+                            fontSize: 12,
+                            cursor: "pointer",
+                          }}
+                          title="Remove photo"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. Custom Handwritten Polaroid Caption Input */}
+                  <div style={{
+                    background: 'linear-gradient(145deg, rgba(20, 8, 15, 0.85) 0%, rgba(12, 4, 9, 0.9) 100%)',
+                    border: '1px solid rgba(212, 165, 116, 0.25)',
+                    borderRadius: 14,
+                    padding: '16px 16px 18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 13 }}>✍️</span>
+                        <label style={{
+                          fontSize: 12,
+                          fontWeight: 700,
+                          color: '#d4a574',
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                        }}>
+                          Handwritten Polaroid Caption
+                        </label>
+                      </div>
+                      <span style={{
+                        fontSize: 11,
+                        color: photoCaption.length > 70 ? '#e07a5f' : 'rgba(250,248,245,0.45)',
+                        fontWeight: 500,
+                        background: 'rgba(255,255,255,0.05)',
+                        padding: '1px 7px',
+                        borderRadius: 8,
+                      }}>
+                        {photoCaption.length}/80
+                      </span>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={photoCaption}
+                      onChange={e => setPhotoCaption(e.target.value)}
+                      placeholder="A photo that says what words can't"
+                      maxLength={80}
+                      style={{
+                        width: '100%',
+                        background: 'rgba(8, 2, 6, 0.75)',
+                        border: '1px solid rgba(212, 165, 116, 0.35)',
+                        borderRadius: 8,
+                        padding: '11px 14px',
+                        color: '#faf8f5',
+                        fontSize: 16.5,
+                        fontFamily: "'Dancing Script', cursive",
+                        outline: 'none',
+                        letterSpacing: '0.02em',
+                        transition: 'border-color 0.2s ease',
+                      }}
+                    />
+
+                    <div style={{
+                      fontSize: 11.5,
+                      color: 'rgba(250,248,245,0.55)',
+                      lineHeight: 1.4,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}>
+                      <span>✦</span>
+                      <span>Replaces default caption and displays in cursive handwriting enclosed in double quotes.</span>
+                    </div>
                   </div>
-                  <div className="upload-zone-hint">JPEG, PNG, or WebP. Max 2MB.</div>
+
+                  {/* 3. Live Polaroid Frame Preview */}
+                  {photoPreviewUrl && (
+                    <div style={{
+                      background: 'radial-gradient(ellipse at 50% 30%, rgba(26, 10, 18, 0.9) 0%, rgba(10, 3, 7, 0.95) 100%)',
+                      border: '1px solid rgba(212,165,116,0.25)',
+                      borderRadius: 16,
+                      padding: '24px 20px 22px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      boxShadow: '0 14px 36px rgba(0,0,0,0.6)',
+                      position: 'relative',
+                    }}>
+                      {/* Top Preview Badge */}
+                      <div style={{
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        color: '#d4a574',
+                        background: 'rgba(212,165,116,0.12)',
+                        border: '1px solid rgba(212,165,116,0.25)',
+                        padding: '2px 10px',
+                        borderRadius: 12,
+                        marginBottom: 18,
+                      }}>
+                        ✦ Live Polaroid Preview
+                      </div>
+
+                      {/* Polaroid Card */}
+                      <div style={{
+                        background: '#fdfbf7',
+                        padding: '14px 14px 24px',
+                        borderRadius: 4,
+                        boxShadow: '0 18px 45px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.3)',
+                        transform: 'rotate(-1.5deg)',
+                        maxWidth: 320,
+                        width: '100%',
+                        border: '1px solid rgba(200, 184, 163, 0.6)',
+                        position: 'relative',
+                      }}>
+                        {/* Washi tape visual accent at top */}
+                        <div style={{
+                          position: 'absolute',
+                          top: -10,
+                          left: '50%',
+                          transform: 'translateX(-50%) rotate(1.5deg)',
+                          width: 70,
+                          height: 20,
+                          background: 'rgba(212, 165, 116, 0.45)',
+                          backdropFilter: 'blur(4px)',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                        }} />
+
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photoPreviewUrl}
+                          alt="Uploaded preview"
+                          style={{
+                            width: '100%',
+                            height: 240,
+                            objectFit: 'cover',
+                            borderRadius: 2,
+                            display: 'block',
+                          }}
+                        />
+
+                        {/* Handwritten cursive caption in double quotes */}
+                        <div style={{
+                          fontFamily: "'Dancing Script', cursive",
+                          fontSize: 18,
+                          color: '#3a2d24',
+                          marginTop: 12,
+                          textAlign: 'center',
+                          fontWeight: 600,
+                          letterSpacing: '0.02em',
+                          lineHeight: 1.3,
+                        }}>
+                          {photoCaption.trim() ? `“${photoCaption.trim()}”` : `“A photo that says what words can't”`}
+                        </div>
+                      </div>
+
+                      <div style={{
+                        marginTop: 18,
+                        fontSize: 12,
+                        color: 'rgba(212,165,116,0.85)',
+                        fontStyle: 'italic',
+                        textAlign: 'center',
+                      }}>
+                        ✦ Renders below your handwritten letter when the wax seal is broken.
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </Section>
@@ -2229,178 +3483,66 @@ function CreatePageInner() {
             </Section>
 
             {/* Continue button */}
-            <button
-              className="continue-btn"
-              onClick={() => setStep(2)}
-            >
-              Continue →
-            </button>
+            <div style={{ marginTop: 12 }}>
+              <button
+                className="continue-btn"
+                onClick={() => {
+                  if (!message.trim()) {
+                    alert('Please write your message before continuing.');
+                    return;
+                  }
+                  setStep(2);
+                }}
+                disabled={!message.trim()}
+                style={{
+                  opacity: !message.trim() ? 0.45 : 1,
+                  cursor: !message.trim() ? 'not-allowed' : 'pointer',
+                  filter: !message.trim() ? 'grayscale(40%)' : 'none',
+                  transition: 'all 0.25s ease',
+                }}
+                title={!message.trim() ? 'Please type your letter before continuing' : 'Continue to Step 2'}
+              >
+                Continue →
+              </button>
+              {!message.trim() && (
+                <p style={{
+                  textAlign: 'center',
+                  fontFamily: "'Crimson Pro', serif",
+                  fontSize: 13,
+                  color: 'rgba(250, 248, 245, 0.4)',
+                  marginTop: 8,
+                }}>
+                  ✍️ Please write something in your letter before continuing
+                </p>
+              )}
+            </div>
           </>
         )}
 
-        {/* ═══════════════════ STEP 2 (Matching Reference Screenshot) ═══════════════════ */}
+        {/* ═══════════════════ STEP 2 (POSTMAN: Protection & Delivery) ═══════════════════ */}
         {step === 2 && (
           <div style={{
             animation: 'fadeInSlide 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 18,
           }}>
-            {/* Difficulty Question Label */}
-            <div style={{
-              fontFamily: "'Crimson Pro', serif",
-              fontSize: 14.5,
-              color: 'rgba(212, 165, 116, 0.55)',
-              marginBottom: 12,
-              textAlign: 'left',
-            }}>
-              how hard should it be to open?
-            </div>
-
-            {/* 2 Side-by-Side Difficulty Options Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 14,
-              marginBottom: 24,
-            }}>
-              {/* Option 1: Easy */}
-              <button
-                type="button"
-                onClick={() => setDifficulty('easy')}
-                style={{
-                  background: difficulty === 'easy' ? 'rgba(28, 12, 18, 0.75)' : 'rgba(14, 6, 10, 0.55)',
-                  border: difficulty === 'easy' ? '1px solid rgba(212, 165, 116, 0.38)' : '1px solid rgba(255, 255, 255, 0.07)',
-                  borderRadius: 14,
-                  padding: '22px 18px 20px',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  outline: 'none',
-                  boxShadow: difficulty === 'easy'
-                    ? '0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 220, 180, 0.1)'
-                    : '0 2px 10px rgba(0, 0, 0, 0.3)',
-                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: difficulty === 'easy' ? 'translateY(-1px)' : 'none',
-                }}
-                onMouseEnter={e => {
-                  if (difficulty !== 'easy') {
-                    e.currentTarget.style.borderColor = 'rgba(212, 165, 116, 0.25)';
-                    e.currentTarget.style.background = 'rgba(20, 8, 14, 0.65)';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (difficulty !== 'easy') {
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
-                    e.currentTarget.style.background = 'rgba(14, 6, 10, 0.55)';
-                  }
-                }}
-              >
-                <div style={{
-                  fontSize: 22,
-                  marginBottom: 6,
-                  color: difficulty === 'easy' ? '#d4a574' : 'rgba(212, 165, 116, 0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  filter: difficulty === 'easy' ? 'drop-shadow(0 0 8px rgba(212, 165, 116, 0.4))' : 'none',
-                  transition: 'all 0.2s ease',
-                }}>
-                  ✦
-                </div>
-                <div style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 16.5,
-                  color: '#faf8f5',
-                  fontWeight: 600,
-                  marginBottom: 3,
-                }}>
-                  easy
-                </div>
-                <div style={{
-                  fontFamily: "'Crimson Pro', serif",
-                  fontSize: 13,
-                  color: 'rgba(250, 248, 245, 0.45)',
-                }}>
-                  opens right away
-                </div>
-              </button>
-
-              {/* Option 2: Make Them Wait */}
-              <button
-                type="button"
-                onClick={() => setDifficulty('wait')}
-                style={{
-                  background: difficulty === 'wait' ? 'rgba(28, 12, 18, 0.75)' : 'rgba(14, 6, 10, 0.55)',
-                  border: difficulty === 'wait' ? '1px solid rgba(212, 165, 116, 0.38)' : '1px solid rgba(255, 255, 255, 0.07)',
-                  borderRadius: 14,
-                  padding: '22px 18px 20px',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  outline: 'none',
-                  boxShadow: difficulty === 'wait'
-                    ? '0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 220, 180, 0.1)'
-                    : '0 2px 10px rgba(0, 0, 0, 0.3)',
-                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: difficulty === 'wait' ? 'translateY(-1px)' : 'none',
-                }}
-                onMouseEnter={e => {
-                  if (difficulty !== 'wait') {
-                    e.currentTarget.style.borderColor = 'rgba(212, 165, 116, 0.25)';
-                    e.currentTarget.style.background = 'rgba(20, 8, 14, 0.65)';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (difficulty !== 'wait') {
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
-                    e.currentTarget.style.background = 'rgba(14, 6, 10, 0.55)';
-                  }
-                }}
-              >
-                <div style={{
-                  fontSize: 22,
-                  marginBottom: 6,
-                  color: difficulty === 'wait' ? '#d4a574' : 'rgba(212, 165, 116, 0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  filter: difficulty === 'wait' ? 'drop-shadow(0 0 8px rgba(212, 165, 116, 0.4))' : 'none',
-                  transition: 'all 0.2s ease',
-                }}>
-                  🔥
-                </div>
-                <div style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 16.5,
-                  color: '#faf8f5',
-                  fontWeight: 600,
-                  marginBottom: 3,
-                }}>
-                  make them wait
-                </div>
-                <div style={{
-                  fontFamily: "'Crimson Pro', serif",
-                  fontSize: 13,
-                  color: 'rgba(250, 248, 245, 0.45)',
-                }}>
-                  teases before revealing
-                </div>
-              </button>
-            </div>
-
-            {/* Guardian Card */}
+            {/* ── Guardian Protection Card ── */}
             <div style={{
               background: 'rgba(18, 8, 12, 0.78)',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(220, 170, 130, 0.10)',
+              border: '1px solid rgba(220, 170, 130, 0.12)',
               borderRadius: 16,
               padding: '24px',
               boxShadow: '0 16px 40px rgba(0, 0, 0, 0.60)',
-              marginBottom: 24,
             }}>
               {/* Guardian Header */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 14,
-                marginBottom: 20,
+                marginBottom: 18,
               }}>
                 <div style={{
                   width: 44,
@@ -2426,7 +3568,7 @@ function CreatePageInner() {
                     color: '#faf8f5',
                     lineHeight: 1.2,
                   }}>
-                    Guardian
+                    Letter Protection
                   </div>
                   <div style={{
                     fontFamily: "'Crimson Pro', serif",
@@ -2434,12 +3576,12 @@ function CreatePageInner() {
                     color: 'rgba(250, 248, 245, 0.45)',
                     marginTop: 2,
                   }}>
-                    Protect your letter
+                    Choose if your letter needs a key or time lock before opening
                   </div>
                 </div>
               </div>
 
-              {/* 3 Guardian Tab Options (Matching Screenshot) */}
+              {/* 3 Guardian Tab Options */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr 1fr',
@@ -2467,20 +3609,8 @@ function CreatePageInner() {
                     justifyContent: 'center',
                     gap: 6,
                   }}
-                  onMouseEnter={e => {
-                    if (guardianType !== 'none') {
-                      e.currentTarget.style.color = '#faf8f5';
-                      e.currentTarget.style.borderColor = 'rgba(212, 165, 116, 0.25)';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (guardianType !== 'none') {
-                      e.currentTarget.style.color = 'rgba(250, 248, 245, 0.6)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                    }
-                  }}
                 >
-                  No Protection
+                  <span>✨</span> No Lock
                 </button>
 
                 {/* Tab 2: Time Lock */}
@@ -2504,18 +3634,6 @@ function CreatePageInner() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 6,
-                  }}
-                  onMouseEnter={e => {
-                    if (guardianType !== 'time') {
-                      e.currentTarget.style.color = '#faf8f5';
-                      e.currentTarget.style.borderColor = 'rgba(212, 165, 116, 0.25)';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (guardianType !== 'time') {
-                      e.currentTarget.style.color = 'rgba(250, 248, 245, 0.6)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                    }
                   }}
                 >
                   <span>⏱</span> Time Lock
@@ -2543,18 +3661,6 @@ function CreatePageInner() {
                     justifyContent: 'center',
                     gap: 6,
                   }}
-                  onMouseEnter={e => {
-                    if (guardianType !== 'question') {
-                      e.currentTarget.style.color = '#faf8f5';
-                      e.currentTarget.style.borderColor = 'rgba(212, 165, 116, 0.25)';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (guardianType !== 'question') {
-                      e.currentTarget.style.color = 'rgba(250, 248, 245, 0.6)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                    }
-                  }}
                 >
                   <span>🔒</span> Question
                 </button>
@@ -2563,7 +3669,7 @@ function CreatePageInner() {
               {/* Secret Question inputs with animation */}
               {guardianType === 'question' && (
                 <div style={{
-                  marginTop: 20,
+                  marginTop: 18,
                   paddingTop: 16,
                   borderTop: '1px solid rgba(255, 215, 180, 0.08)',
                   animation: 'fadeInSlide 0.25s ease',
@@ -2571,11 +3677,11 @@ function CreatePageInner() {
                   <label className="field-label">Secret Question</label>
                   <input
                     className="field-input"
-                    placeholder="e.g. What is the name of our favorite cafe?"
+                    placeholder="e.g. What was the name of the cafe where we first met?"
                     value={question}
                     onChange={e => setQuestion(e.target.value)}
                   />
-                  <label className="field-label" style={{ marginTop: 14 }}>Answer</label>
+                  <label className="field-label" style={{ marginTop: 14 }}>Expected Answer (Case-Insensitive)</label>
                   <input
                     className="field-input"
                     placeholder="e.g. Blue Bottle"
@@ -2585,31 +3691,243 @@ function CreatePageInner() {
                 </div>
               )}
 
-              {/* Time Lock datetime input with animation */}
+              {/* Time Lock datetime input with SleekCustomDateTimePicker */}
               {guardianType === 'time' && (
                 <div style={{
-                  marginTop: 20,
+                  marginTop: 18,
                   paddingTop: 16,
                   borderTop: '1px solid rgba(255, 215, 180, 0.08)',
                   animation: 'fadeInSlide 0.25s ease',
                 }}>
-                  <label className="field-label">Unlock Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    className="field-input"
+                  <div style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: '#faf8f5',
+                    marginBottom: 4,
+                  }}>
+                    Set Unlock Date & Time
+                  </div>
+                  <div style={{
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 13,
+                    color: 'rgba(250, 248, 245, 0.5)',
+                    marginBottom: 6,
+                  }}>
+                    Choose the exact moment this letter is permitted to be unsealed.
+                  </div>
+                  <IntuitiveLetterDatePicker
                     value={lockDate}
-                    onChange={e => setLockDate(e.target.value)}
-                    style={{ colorScheme: 'dark' }}
+                    onChange={setLockDate}
+                    helperText="The recipient cannot unseal the letter before this exact moment."
                   />
                 </div>
               )}
             </div>
 
-            {/* Bottom Action Row (Matching Screenshot) */}
+            {/* ── Postman Delivery & Alerts Card (Always Open & Visible) ── */}
+            <div style={{
+              background: 'rgba(18, 8, 12, 0.78)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(220, 170, 130, 0.12)',
+              borderRadius: 16,
+              padding: '24px',
+              boxShadow: '0 16px 40px rgba(0, 0, 0, 0.60)',
+            }}>
+              {/* Postman Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                marginBottom: 18,
+              }}>
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle at 35% 30%, #d4a574 0%, #8c5828 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 14px rgba(212, 165, 116, 0.35)',
+                  border: '1px solid rgba(212, 165, 116, 0.5)',
+                  color: '#1a0808',
+                  fontSize: 20,
+                  flexShrink: 0,
+                }}>
+                  📬
+                </div>
+                <div>
+                  <div style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: 20,
+                    fontWeight: 600,
+                    color: '#faf8f5',
+                    lineHeight: 1.2,
+                  }}>
+                    Postman Delivery & Alerts
+                  </div>
+                  <div style={{
+                    fontFamily: "'Crimson Pro', serif",
+                    fontSize: 14,
+                    color: 'rgba(250, 248, 245, 0.45)',
+                    marginTop: 2,
+                  }}>
+                    Instant read receipts & automated future delivery
+                  </div>
+                </div>
+              </div>
+
+              {/* Sender Email Notification Field */}
+              <div style={{ marginBottom: 20 }}>
+                <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
+                  <span>✉️</span> Notify me when they open or react (optional)
+                </label>
+                <input
+                  type="email"
+                  className="field-input"
+                  placeholder="your.email@example.com"
+                  value={senderEmail}
+                  onChange={e => setSenderEmail(e.target.value)}
+                />
+                <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 12.5, color: 'rgba(250,248,245,0.4)', marginTop: 5 }}>
+                  Zero passwords or sign-up needed. We'll only send an email the second your letter is unsealed.
+                </p>
+              </div>
+
+              {/* Scheduled Future Delivery Toggle */}
+              <div style={{
+                paddingTop: 18,
+                borderTop: '1px solid rgba(255, 215, 180, 0.08)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <div>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 600, color: '#faf8f5' }}>
+                      📅 Schedule Automated Delivery
+                    </div>
+                    <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: 13, color: 'rgba(250,248,245,0.5)', marginTop: 2 }}>
+                      Automatically email the sealed envelope link to the recipient on a specific date
+                    </div>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    background: 'rgba(12, 5, 8, 0.90)',
+                    border: '1px solid rgba(212, 165, 116, 0.28)',
+                    borderRadius: 20,
+                    padding: '3px',
+                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5)',
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setScheduleDelivery(false)}
+                      style={{
+                        padding: '5px 14px',
+                        borderRadius: 16,
+                        border: 'none',
+                        background: !scheduleDelivery ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
+                        color: !scheduleDelivery ? '#ffffff' : 'rgba(250, 248, 245, 0.45)',
+                        fontFamily: "'Crimson Pro', serif",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        letterSpacing: '0.04em',
+                        cursor: 'pointer',
+                        transition: 'all 0.18s ease',
+                      }}
+                    >
+                      OFF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setScheduleDelivery(true)}
+                      style={{
+                        padding: '5px 14px',
+                        borderRadius: 16,
+                        border: 'none',
+                        background: scheduleDelivery ? 'linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)' : 'transparent',
+                        color: scheduleDelivery ? '#ffffff' : 'rgba(250, 248, 245, 0.45)',
+                        fontFamily: "'Crimson Pro', serif",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        letterSpacing: '0.04em',
+                        cursor: 'pointer',
+                        boxShadow: scheduleDelivery ? '0 2px 10px rgba(196, 30, 58, 0.5)' : 'none',
+                        transition: 'all 0.18s ease',
+                      }}
+                    >
+                      ON
+                    </button>
+                  </div>
+                </div>
+
+                {scheduleDelivery && (
+                  <div style={{ animation: 'fadeInSlide 0.25s ease', display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
+                    <div>
+                      <label className="field-label" style={{ fontSize: 14 }}>Recipient's Email Address</label>
+                      <input
+                        type="email"
+                        className="field-input"
+                        placeholder="recipient@example.com"
+                        value={recipientEmail}
+                        onChange={e => setRecipientEmail(e.target.value)}
+                        required={scheduleDelivery}
+                      />
+                    </div>
+                    <div>
+                      <label className="field-label" style={{ fontSize: 14 }}>Choose Delivery Date & Time</label>
+                      <IntuitiveLetterDatePicker
+                        value={scheduledDate}
+                        onChange={setScheduledDate}
+                        helperText="The sealed letter invitation email will be delivered to the recipient at this exact date and time."
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Past Date Error Banner if user selected past date */}
+            {(guardianType === 'time' && Boolean(lockDate) && new Date(lockDate).getTime() <= Date.now()) && (
+              <div style={{
+                background: 'rgba(224, 32, 56, 0.15)',
+                border: '1px solid rgba(224, 32, 56, 0.45)',
+                borderRadius: 10,
+                padding: '10px 14px',
+                fontFamily: "'Crimson Pro', serif",
+                fontSize: 13.5,
+                color: '#ff8090',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                animation: 'fadeInSlide 0.2s ease',
+              }}>
+                <span>⚠️</span> The unlock date for Time Lock cannot be in the past. Please choose a future time.
+              </div>
+            )}
+
+            {(scheduleDelivery && Boolean(scheduledDate) && new Date(scheduledDate).getTime() <= Date.now()) && (
+              <div style={{
+                background: 'rgba(224, 32, 56, 0.15)',
+                border: '1px solid rgba(224, 32, 56, 0.45)',
+                borderRadius: 10,
+                padding: '10px 14px',
+                fontFamily: "'Crimson Pro', serif",
+                fontSize: 13.5,
+                color: '#ff8090',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                animation: 'fadeInSlide 0.2s ease',
+              }}>
+                <span>⚠️</span> The scheduled delivery date cannot be in the past. Please choose a future time.
+              </div>
+            )}
+
+            {/* Bottom Action Row */}
             <div style={{
               display: 'flex',
               gap: 14,
-              marginTop: 28,
+              marginTop: 10,
               alignItems: 'stretch',
             }}>
               {/* Back Button */}
@@ -2652,11 +3970,13 @@ function CreatePageInner() {
               <button
                 type="button"
                 onClick={handleSeal}
-                disabled={submitting}
+                disabled={submitting || (guardianType === 'time' && Boolean(lockDate) && new Date(lockDate).getTime() <= Date.now()) || (scheduleDelivery && Boolean(scheduledDate) && new Date(scheduledDate).getTime() <= Date.now())}
                 style={{
                   flex: 1.8,
                   height: 52,
-                  background: 'linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)',
+                  background: ((guardianType === 'time' && Boolean(lockDate) && new Date(lockDate).getTime() <= Date.now()) || (scheduleDelivery && Boolean(scheduledDate) && new Date(scheduledDate).getTime() <= Date.now()))
+                    ? 'rgba(100, 30, 40, 0.5)'
+                    : 'linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)',
                   border: '1.5px solid rgba(255, 255, 255, 0.7)',
                   borderRadius: 12,
                   color: '#ffffff',
@@ -2664,7 +3984,7 @@ function CreatePageInner() {
                   fontSize: 16,
                   fontWeight: 600,
                   letterSpacing: '0.04em',
-                  cursor: submitting ? 'default' : 'pointer',
+                  cursor: (submitting || (guardianType === 'time' && Boolean(lockDate) && new Date(lockDate).getTime() <= Date.now()) || (scheduleDelivery && Boolean(scheduledDate) && new Date(scheduledDate).getTime() <= Date.now())) ? 'not-allowed' : 'pointer',
                   outline: 'none',
                   boxShadow: '0 6px 24px rgba(196, 30, 58, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
                   display: 'flex',
@@ -2672,7 +3992,7 @@ function CreatePageInner() {
                   justifyContent: 'center',
                   gap: 8,
                   transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  opacity: submitting ? 0.7 : 1,
+                  opacity: (submitting || (guardianType === 'time' && Boolean(lockDate) && new Date(lockDate).getTime() <= Date.now()) || (scheduleDelivery && Boolean(scheduledDate) && new Date(scheduledDate).getTime() <= Date.now())) ? 0.6 : 1,
                 }}
                 onMouseEnter={e => {
                   if (!submitting) {

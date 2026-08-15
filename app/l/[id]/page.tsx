@@ -248,12 +248,55 @@ function LetterPageInner() {
   );
 
   if (error) return (
-    <div style={{ minHeight: '100vh', background: '#0d0005', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f0e0e8', textAlign: 'center', padding: 24 }}>
-      <div>
-        <div style={{ fontSize: 48, marginBottom: 12 }}>💔</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 8 }}>Letter not found</h2>
-        <p style={{ color: '#7a6070' }}>{error}</p>
-        <Link href="/" style={{ color: '#d4af37', marginTop: 20, display: 'block' }}>← Go home</Link>
+    <div style={{ minHeight: '100vh', background: '#080204', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#faf8f5', textAlign: 'center', padding: '2rem', fontFamily: "'Crimson Pro', serif" }}>
+      <div style={{ maxWidth: 440 }}>
+        <div style={{
+          width: 72,
+          height: 72,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 30%, #ff4d4f, #8b1820)',
+          boxShadow: '0 0 45px rgba(255,77,79,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '32px',
+          margin: '0 auto 24px',
+        }}>
+          🔥
+        </div>
+        <p style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 12,
+          letterSpacing: '0.3em',
+          textTransform: 'uppercase',
+          color: '#d4a574',
+          marginBottom: 10,
+        }}>
+          Letter Vaporized
+        </p>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(26px, 5vw, 34px)', color: '#faf8f5', marginBottom: 12 }}>
+          This Letter Was Burned to Ashes
+        </h2>
+        <p style={{ color: 'rgba(250,248,245,0.65)', fontSize: 16, lineHeight: 1.6, marginBottom: 28 }}>
+          The sender chose to destroy this letter before it could be opened. Its words are lost to time.
+        </p>
+        <Link
+          href="/create"
+          style={{
+            background: 'linear-gradient(135deg, #e42038, #8b1820)',
+            color: '#faf8f5',
+            padding: '12px 28px',
+            borderRadius: 10,
+            textDecoration: 'none',
+            fontSize: 15,
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            boxShadow: '0 8px 24px rgba(228,32,56,0.4)',
+            display: 'inline-block',
+          }}
+        >
+          ✉ Write a Letter
+        </Link>
       </div>
     </div>
   );
@@ -445,34 +488,72 @@ function LetterPageInner() {
               )}
 
               {/* Attached Photo Polaroid Frame */}
-              {letter.photo && revealedChars >= letter.message.length && (
-                <div style={{ marginTop: 36, display: 'flex', justifyContent: 'center' }}>
-                  <div style={{
-                    background: '#ffffff',
-                    padding: '12px 12px 28px',
-                    borderRadius: 4,
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.06)',
-                    transform: 'rotate(-1.5deg)',
-                    maxWidth: 340,
-                    width: '100%',
-                  }}>
-                    <img
-                      src={letter.photo}
-                      alt="Attached memory"
-                      style={{ width: '100%', height: 'auto', borderRadius: 2, display: 'block', maxHeight: 380, objectFit: 'cover' }}
-                    />
+              {(() => {
+                if (!letter.photo || revealedChars < letter.message.length) return null;
+                let photoSrc = letter.photo;
+                let photoCaptionText = "";
+                try {
+                  if (letter.photo.startsWith("{")) {
+                    const parsed = JSON.parse(letter.photo);
+                    photoSrc = parsed.url || letter.photo;
+                    photoCaptionText = parsed.caption || "";
+                  }
+                } catch {
+                  photoSrc = letter.photo;
+                }
+
+                if (!photoSrc) return null;
+
+                return (
+                  <div style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
                     <div style={{
-                      fontFamily: "'Dancing Script', cursive",
-                      color: '#555555',
-                      fontSize: 16,
-                      marginTop: 12,
-                      textAlign: 'center',
+                      background: '#fdfbf7',
+                      padding: '16px 16px 26px',
+                      borderRadius: 4,
+                      boxShadow: '0 24px 64px rgba(0,0,0,0.75), 0 3px 12px rgba(0,0,0,0.35)',
+                      transform: 'rotate(-2deg)',
+                      maxWidth: 440,
+                      width: '100%',
+                      border: '1px solid rgba(200, 184, 163, 0.65)',
+                      position: 'relative',
                     }}>
-                      A photo that says what words can't 📷
+                      {/* Washi tape visual accent at top */}
+                      <div style={{
+                        position: 'absolute',
+                        top: -11,
+                        left: '50%',
+                        transform: 'translateX(-50%) rotate(2deg)',
+                        width: 84,
+                        height: 22,
+                        background: 'rgba(212, 165, 116, 0.5)',
+                        backdropFilter: 'blur(4px)',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                      }} />
+
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photoSrc}
+                        alt="Attached memory"
+                        style={{ width: '100%', height: 'auto', borderRadius: 2, display: 'block', maxHeight: 380, objectFit: 'cover' }}
+                      />
+
+                      {/* Handwritten cursive caption in double quotes */}
+                      <div style={{
+                        fontFamily: "'Dancing Script', cursive",
+                        fontSize: 'clamp(18px, 4vw, 21px)',
+                        color: '#3a2d24',
+                        marginTop: 14,
+                        textAlign: 'center',
+                        fontWeight: 600,
+                        letterSpacing: '0.02em',
+                        lineHeight: 1.35,
+                      }}>
+                        {photoCaptionText.trim() ? `“${photoCaptionText.trim()}”` : `“A photo that says what words can't”`}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Recipient Voice Message Player Card */}
               {letter.voiceMessage && revealedChars >= letter.message.length && (

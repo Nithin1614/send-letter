@@ -1,10 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-
-export const isSupabaseConfigured = () =>
-  Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -35,7 +32,13 @@ export interface OWLetter {
   seal_status: "unopened" | "unsealed";
   view_count: number;
   attempt_count: number;
-  reactions: string[];
+  reply_to_id?: string | null;
+  reply_letter_id?: string | null;
+  sender_email?: string | null;
+  recipient_email?: string | null;
+  scheduled_for?: string | null;
+  delivery_status?: "draft" | "scheduled" | "delivered" | null;
+  ambient_soundscape?: string | null;
   created_at: string;
   opened_at: string | null;
   last_viewed_at: string | null;

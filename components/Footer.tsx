@@ -23,29 +23,24 @@ export default function Footer() {
         {/* The Letters */}
         <div>
           <p className="footer-col-title">The Letters</p>
-          <Link href="/open-when" className="footer-link">Browse Letters</Link>
-          <Link href="/open-when" className="footer-link">What to Write</Link>
-          <Link href="/journal" className="footer-link">Journal</Link>
-          <Link href="/college-sendoff" className="footer-link">College Send-Off</Link>
-          <Link href="/future-self" className="footer-link">Letter to Your Future Self</Link>
-          <Link href="/why" className="footer-link">Why Send Letter</Link>
-          <Link href="/create" className="footer-link">Make a Letter</Link>
+          <Link href="/create" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">Make a Letter</Link>
+          <Link href="/open-when" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">Browse Letters</Link>
+          <Link href="/how-it-works" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">How It Works</Link>
         </div>
 
-        {/* Companions */}
+        {/* Inspiration & Support */}
         <div>
-          <p className="footer-col-title">Companions</p>
-          <Link href="/about" className="footer-link">A Letter From Us</Link>
-          <Link href="/support" className="footer-link">Support</Link>
-          <Link href="/feedback" className="footer-link">Send Feedback</Link>
+          <p className="footer-col-title">Inspiration &amp; Help</p>
+          <Link href="/journal" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">The Journal</Link>
+          <Link href="/open-when" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">Letter Library</Link>
+          <Link href="/support" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">Help &amp; Support</Link>
         </div>
 
-        {/* Fine Print */}
+        {/* The Fine Print */}
         <div>
           <p className="footer-col-title">The Fine Print</p>
-          <Link href="/privacy" className="footer-link">Privacy</Link>
-          <Link href="/terms" className="footer-link">Terms</Link>
-          <Link href="/for-ai-agents" className="footer-link">For AI Agents</Link>
+          <Link href="/privacy" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">Privacy Policy</Link>
+          <Link href="/terms" scroll={true} onClick={() => window.scrollTo(0, 0)} className="footer-link">Terms of Service</Link>
         </div>
       </div>
     </footer>
