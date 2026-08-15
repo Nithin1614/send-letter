@@ -22,11 +22,11 @@ const SHOWCASE_TRACKS = [
     previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/b8/f1/27/b8f12759-6778-7101-407d-0f72f6254db5/mzaf_2406318888854172343.plus.aac.p.m4a",
   },
   {
-    title: "Vesane O Nicchena",
-    artist: "Kapil Kapilan & Sameera Bharadwaj",
-    genre: "Rowdy Boys",
-    artwork: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/49/0d/57/490d57b2-6e41-77cd-eddc-f08b834d280e/cover.jpg/600x600bb.jpg",
-    previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/8e/3c/a5/8e3ca572-6226-9bde-da25-324feaf9a626/mzaf_11537944106324637192.plus.aac.p.m4a",
+    title: "Nenu Nuvvantu",
+    artist: "Harris Jayaraj, Naresh Iyer & Nadeesh",
+    genre: "Orange (Original Motion Picture Soundtrack)",
+    artwork: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/72/72/a6/7272a66e-c071-641c-1c88-8f2495d18d4e/cover.jpg/600x600bb.jpg",
+    previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/18/79/b1/1879b127-5bfa-6a32-f6d1-9c14f42cd306/mzaf_473814996909398735.plus.aac.p.m4a",
   },
   {
     title: "Ain't No Sunshine",

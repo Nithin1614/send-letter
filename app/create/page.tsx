@@ -1158,12 +1158,12 @@ const CURATED_POPULAR_PICKS: iTunesSong[] = [
     previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/f7/0f/47/f70f47f5-fcd7-2f0d-2969-b198fc67f3d4/mzaf_3414447984203533742.plus.aac.p.m4a',
   },
   {
-    trackId: 1604613637,
-    trackName: 'Vesane O Nicchena',
-    artistName: 'Kapil Kapilan & Sameera Bharadwaj',
-    collectionName: 'Rowdy Boys',
-    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/49/0d/57/490d57b2-6e41-77cd-eddc-f08b834d280e/cover.jpg/100x100bb.jpg',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/8e/3c/a5/8e3ca572-6226-9bde-da25-324feaf9a626/mzaf_11537944106324637192.plus.aac.p.m4a',
+    trackId: 931714575,
+    trackName: 'Nenu Nuvvantu',
+    artistName: 'Harris Jayaraj, Naresh Iyer & Nadeesh',
+    collectionName: 'Orange',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/72/72/a6/7272a66e-c071-641c-1c88-8f2495d18d4e/cover.jpg/100x100bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/18/79/b1/1879b127-5bfa-6a32-f6d1-9c14f42cd306/mzaf_473814996909398735.plus.aac.p.m4a',
   },
   {
     trackId: 1445949267,
