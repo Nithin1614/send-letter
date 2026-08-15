@@ -2767,33 +2767,8 @@ function CreatePageInner() {
                           {e.name}
                         </span>
 
-                        {isActive ? (
+                        {isActive && (
                           <span style={{ color: '#d4a574', fontSize: 13, fontWeight: 'bold' }}>✓</span>
-                        ) : isDefault ? (
-                          <span style={{
-                            fontSize: 9.5,
-                            fontFamily: "'Crimson Pro', serif",
-                            background: 'rgba(255,255,255,0.1)',
-                            color: 'rgba(250,248,245,0.65)',
-                            padding: '2px 6px',
-                            borderRadius: 4,
-                            lineHeight: 1,
-                          }}>
-                            Default
-                          </span>
-                        ) : (
-                          <span style={{
-                            fontSize: 9,
-                            fontFamily: "'Crimson Pro', serif",
-                            background: 'rgba(35, 20, 5, 0.7)',
-                            border: '1px solid rgba(212,165,116,0.35)',
-                            color: '#d4a574',
-                            padding: '2px 6px',
-                            borderRadius: 6,
-                            lineHeight: 1,
-                          }}>
-                            🔒 PRO
-                          </span>
                         )}
                       </div>
                     </button>
