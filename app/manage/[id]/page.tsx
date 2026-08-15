@@ -602,7 +602,7 @@ function ManagePageInner() {
                 e.currentTarget.style.transform = 'none';
               }}
             >
-              <span>📲</span> Share Letter Link (WhatsApp, Instagram, Messages...)
+              <span>📲</span> Share Letter Link
             </button>
           </div>
 
