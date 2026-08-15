@@ -121,15 +121,38 @@ function LandingMusicShowcase() {
   const playTrackAudio = (track: (typeof SHOWCASE_TRACKS)[0]) => {
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.src = "";
     }
     setIsPlaying(false);
     setProgress(0);
     setCurrentTime(0);
 
     if (track.previewUrl) {
-      const audio = new Audio(track.previewUrl);
+      const audio = new Audio();
+      audio.crossOrigin = "anonymous";
+      audio.src = track.previewUrl;
+      audio.volume = 0.48;
       audioRef.current = audio;
-      fadeInAudio(audio, 0.50, 1500);
+
+      // Web Audio Gain Node to enforce 50% cap on mobile hardware
+      try {
+        const AudioCtx = typeof window !== "undefined" ? (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext) : null;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          if (ctx.state === "suspended") {
+            ctx.resume();
+          }
+          const source = ctx.createMediaElementSource(audio);
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.48, ctx.currentTime + 1.2);
+          source.connect(gain);
+          gain.connect(ctx.destination);
+        }
+      } catch {
+        fadeInAudio(audio, 0.48, 1500);
+      }
+
       audio.ontimeupdate = () => {
         if (audio.duration) {
           setProgress((audio.currentTime / audio.duration) * 100);

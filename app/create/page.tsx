@@ -1908,7 +1908,7 @@ function CreatePageInner() {
     return () => clearTimeout(timer);
   }, [songSearch]);
 
-  // Handle Audio Preview Play/Pause
+  // Handle Audio Preview Play/Pause with digital 50% volume cap
   function handleTogglePreview(song: iTunesSong, e: React.MouseEvent) {
     e.stopPropagation();
     if (!song.previewUrl) return;
@@ -1916,15 +1916,36 @@ function CreatePageInner() {
     if (playingTrackId === song.trackId) {
       if (audioPreviewRef.current) {
         audioPreviewRef.current.pause();
+        audioPreviewRef.current.src = '';
       }
       setPlayingTrackId(null);
     } else {
       if (audioPreviewRef.current) {
         audioPreviewRef.current.pause();
+        audioPreviewRef.current.src = '';
       }
-      audioPreviewRef.current = new Audio(song.previewUrl);
-      audioPreviewRef.current.play().catch(console.error);
-      audioPreviewRef.current.onended = () => setPlayingTrackId(null);
+      const audio = new Audio();
+      audio.crossOrigin = 'anonymous';
+      audio.src = song.previewUrl;
+      audio.volume = 0.48;
+      audioPreviewRef.current = audio;
+
+      try {
+        const AudioCtx = typeof window !== 'undefined' ? (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext) : null;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          if (ctx.state === 'suspended') ctx.resume();
+          const source = ctx.createMediaElementSource(audio);
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.48, ctx.currentTime + 1.2);
+          source.connect(gain);
+          gain.connect(ctx.destination);
+        }
+      } catch {}
+
+      audio.play().catch(console.error);
+      audio.onended = () => setPlayingTrackId(null);
       setPlayingTrackId(song.trackId);
     }
   }
