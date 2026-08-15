@@ -232,6 +232,24 @@ function ManagePageInner() {
     });
   }
 
+  async function handleNativeShare() {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: status?.title ? `Sealed Letter: ${status.title}` : 'Sealed Letter For You',
+          text: `I wrote you a sealed letter on Send Letter. Break the wax seal to open it:`,
+          url: shareUrl,
+        });
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          copyShare();
+        }
+      }
+    } else {
+      copyShare();
+    }
+  }
+
   function copyManage() {
     navigator.clipboard.writeText(manageUrl).then(() => {
       setManageCopied(true);
@@ -548,6 +566,43 @@ function ManagePageInner() {
               }}
             >
               {copied ? '✓ Copied Link!' : '📋 Copy Letter Link'}
+            </button>
+          </div>
+
+          {/* Share Letter Link Directly to Other Apps */}
+          <div style={{ marginTop: 10 }}>
+            <button
+              onClick={handleNativeShare}
+              style={{
+                width: '100%',
+                padding: '11px 16px',
+                borderRadius: 9,
+                background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.16) 0%, rgba(196, 30, 58, 0.12) 100%)',
+                border: '1.5px solid rgba(212, 165, 116, 0.35)',
+                color: '#faf8f5',
+                fontFamily: "'Crimson Pro', serif",
+                fontSize: 14.5,
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(212, 165, 116, 0.25) 0%, rgba(196, 30, 58, 0.2) 100%)';
+                e.currentTarget.style.borderColor = '#d4a574';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(212, 165, 116, 0.16) 0%, rgba(196, 30, 58, 0.12) 100%)';
+                e.currentTarget.style.borderColor = 'rgba(212, 165, 116, 0.35)';
+                e.currentTarget.style.transform = 'none';
+              }}
+            >
+              <span>📲</span> Share Letter Link (WhatsApp, Instagram, Messages...)
             </button>
           </div>
 
