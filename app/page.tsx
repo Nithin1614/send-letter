@@ -730,22 +730,30 @@ const FEATURES = [
 ];
 
 const FAQS = [
-  { q: "Will my crush fall in love with me after opening this?", a: "We can't legally guarantee love, but it definitely works better than overthinking a two-word text for four hours." },
-  { q: "What if they open it while sitting next to their friends?", a: "Their friends will either be jealous and wish someone wrote them letters, or tease them about it. Either way, you will definitely stand out." },
-  { q: "What if I pour my soul out and they reply with just ‘lol’?", a: "That is an unforgivable violation of basic human decency. Our servers will automatically dispatch negative cosmic energy to their IP address." },
-  { q: "Do I have to be in a romantic mood to write one?", a: "You can be lying upside down on your bed questioning your life choices. The vintage paper grain and cursive ink will do 90% of the emotional heavy lifting for you." },
-  { q: "What if I regret sending it at 3 AM?", a: "Every letter gives you a private Secret Management Link. You can hit 'Self-Destruct' and vaporize the letter, photo, and voice notes from existence before they even wake up." },
-  { q: "Can they screenshot my letter?", a: "Yes, but we gave them a 1-tap 'Download Framed Keepsake' button so their screenshot at least looks like a museum piece instead of a low-res mess." },
-  { q: "Will they know I spent 45 minutes rewriting a 3-sentence letter?", a: "Your secret is safe with us. To them, it will appear as effortlessly penned poetry written under the moonlight in 30 seconds." },
-  { q: "How does Send Letter work?", a: "Send Letter is the digital platform for sealed letters. Write a message for a specific moment — an anniversary, a bad day, a milestone — seal it with a virtual wax stamp, set a guardian question, and share the link. Recipients must answer the question and hold to break the seal. No account needed." },
-  { q: "Is Send Letter free to use?", a: "Yes, Send Letter is completely free. No subscription, no hidden fees, no payment required. Create unlimited sealed messages at no cost." },
-  { q: "Do I need to create an account?", a: "No account required. Simply visit Send Letter, compose your message, and share the link. No registration, no login, no personal information needed." },
-  { q: "What is the wax seal unsealing ritual?", a: "The unsealing ritual requires recipients to hold their finger on the wax seal until it breaks. This creates an intentional, meaningful moment of revelation." },
-  { q: "Can recipients read messages without answering the question?", a: "No. Recipients must correctly answer the guardian question before they can access the unsealing ritual. Wrong answers prevent access." },
-  { q: "How secure are my messages?", a: "Messages are protected by guardian questions and encryption. Only the holder of the management link or recipient link can access the letter." },
-  { q: "Can I send anonymous messages?", a: "Yes. You can choose to sign your message or remain anonymous. The signature field is optional." },
-  { q: "How long do messages last?", a: "Messages are persistent and stored securely in our database. You can manage, track, or permanently self-destruct your letter anytime using your private management link." },
-  { q: "How do I confess to my crush without being awkward?", a: "We can't legally guarantee love, but it works way better than accidentally liking their 3-year-old photo at 2 AM." },
+  {
+    q: "How does Send Letter work?",
+    a: "You write your letter, choose your stationery theme and background music, then seal it. You get a private link to share with your recipient. When they open the link, they hold the wax seal to break it and reveal your letter.",
+  },
+  {
+    q: "Is Send Letter completely free?",
+    a: "Yes, Send Letter is 100% free to write, customize, and share. There are no subscriptions, account fees, or hidden charges.",
+  },
+  {
+    q: "Do I or the recipient need an account?",
+    a: "No account or login is needed. You can compose and share letters instantly, and your recipient can open them without signing up.",
+  },
+  {
+    q: "Can I add music, photos, or voice notes to my letter?",
+    a: "Yes! You can attach any background song with live audio preview, upload a photo keepsake, or record a personal voice note directly in the composer.",
+  },
+  {
+    q: "How does the secret question and time-lock work?",
+    a: "You can protect your letter with a secret question that only your recipient can answer, or lock it with a countdown timer so it opens only on a specific birthday, anniversary, or date.",
+  },
+  {
+    q: "How will I know when my letter is opened?",
+    a: "Every letter comes with a private management link where you can track live unseals, see reader reactions, and receive instant email notifications the moment your letter is opened.",
+  },
 ];
 
 function TemplateSeal({ slug }: { slug: string }) {
@@ -889,7 +897,6 @@ function FaqAccordion({ faqs }: { faqs: { q: string; a: string }[] }) {
 }
 
 const CAROUSEL_SLIDES = [
-  { id: "envelopes", label: "Wax Seals & Paper", icon: "🕯️", subtitle: "8 Wax Seals · 9 Papers" },
   { id: "soundtracks", label: "Music & Audio", icon: "🎵", subtitle: "Live Search · 30s Preview" },
   { id: "keepsakes", label: "Polaroid & Prints", icon: "📸", subtitle: "Framed PNG & Origami A4" },
   { id: "vault", label: "Intimate Vault", icon: "🔒", subtitle: "Timelocks & Riddles" },
@@ -1075,7 +1082,7 @@ export default function HomePage() {
             lineHeight: 1.25,
             letterSpacing: "0.01em",
           }}>
-            Swipe to Experience the Ritual.
+            Swipe to explore the app features
           </h2>
           <p style={{
             fontSize: "clamp(14px, 2.5vw, 16.5px)",
@@ -1183,221 +1190,7 @@ export default function HomePage() {
             padding: "8px 2px 20px",
           }}
         >
-          {/* ── SLIDE 1: ARTISAN ENVELOPES & PAPER THEMES ── */}
-          <div style={{
-            flex: "0 0 100%",
-            minWidth: "100%",
-            scrollSnapAlign: "start",
-            boxSizing: "border-box",
-            background: "linear-gradient(145deg, rgba(24, 9, 16, 0.94) 0%, rgba(12, 3, 8, 0.98) 100%)",
-            border: "1px solid rgba(212, 165, 116, 0.28)",
-            borderRadius: 20,
-            padding: "36px 28px",
-            boxShadow: "0 16px 44px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-            position: "relative",
-            overflow: "hidden",
-          }}>
-            <div style={{
-              position: "absolute", top: -30, right: -30, width: 280, height: 280,
-              background: "radial-gradient(circle, rgba(196, 30, 58, 0.15) 0%, transparent 70%)",
-              pointerEvents: "none",
-            }} />
-
-            <div style={{ marginBottom: 28 }}>
-              <div style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 11.5,
-                fontWeight: 700,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "#d4a574",
-                marginBottom: 10,
-                background: "rgba(212,165,116,0.08)",
-                border: "1px solid rgba(212,165,116,0.22)",
-                padding: "4px 14px",
-                borderRadius: 20,
-              }}>
-                <span>✦</span> SOLO CREATOR&apos;S STUDIO
-              </div>
-              <h3 style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: "clamp(24px, 4vw, 32px)",
-                fontWeight: 600,
-                color: "#faf8f5",
-                margin: "0 0 10px",
-                lineHeight: 1.25,
-              }}>
-                Lost An Unreasonable Amount of Sleep Over These Envelopes.
-              </h3>
-              <p style={{
-                fontSize: 14.5,
-                color: "rgba(250,248,245,0.75)",
-                maxWidth: 740,
-                lineHeight: 1.6,
-                margin: 0,
-              }}>
-                I hand-crafted this entire stationery collection from scratch because an intimate letter shouldn&apos;t look like a boring chat bubble. Every 3D wax drip, linen texture, and ribbon was tuned by hand so opening your letter feels like a slow, unforgettable ritual.
-              </p>
-            </div>
-
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
-              gap: 24,
-            }}>
-              {/* Column 1: 8 Handcrafted Envelope Styles */}
-              <div style={{
-                background: "rgba(10, 3, 7, 0.7)",
-                border: "1px solid rgba(212,165,116,0.2)",
-                borderRadius: 16,
-                padding: "22px 20px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 14,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 20 }}>💌</span>
-                    <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      8 Bespoke Envelope Rituals
-                    </h4>
-                  </div>
-                  <span style={{
-                    fontSize: 11, color: "#d4a574",
-                    background: "rgba(212,165,116,0.12)",
-                    border: "1px solid rgba(212,165,116,0.25)",
-                    padding: "2px 8px", borderRadius: 10, fontWeight: 600,
-                  }}>
-                    Interactive Wax Seals
-                  </span>
-                </div>
-
-                <div style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: 10,
-                }}>
-                  {[
-                    { name: "Classic Wax Seal", icon: "🕯️" },
-                    { name: "Twine & Botanical", icon: "🌿" },
-                    { name: "Gold Wax Drip", icon: "✨" },
-                    { name: "Silk Ribbon", icon: "🎀" },
-                    { name: "Vintage Crest", icon: "👑" },
-                    { name: "Floral Washi", icon: "🌸" },
-                    { name: "Lace & Pearl", icon: "🦪" },
-                    { name: "Velvet & Tassel", icon: "🧵" },
-                  ].map((env) => (
-                    <div
-                      key={env.name}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.03)",
-                        border: "1px solid rgba(212, 165, 116, 0.16)",
-                        borderRadius: 10,
-                        padding: "10px 12px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    >
-                      <span style={{ fontSize: 15 }}>{env.icon}</span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>{env.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 2: 9 Tactile Paper Canvases */}
-              <div style={{
-                background: "rgba(10, 3, 7, 0.7)",
-                border: "1px solid rgba(212,165,116,0.2)",
-                borderRadius: 16,
-                padding: "22px 20px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 14,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 20 }}>📜</span>
-                    <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      9 Tactile Stationery Canvases
-                    </h4>
-                  </div>
-                  <span style={{
-                    fontSize: 11, color: "#5ae08a",
-                    background: "rgba(40,160,80,0.18)",
-                    border: "1px solid rgba(70,210,110,0.3)",
-                    padding: "2px 8px", borderRadius: 10, fontWeight: 600,
-                  }}>
-                    Real Paper Grain
-                  </span>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <div style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(212, 165, 116, 0.16)",
-                    borderRadius: 10,
-                    padding: "11px 14px",
-                  }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
-                      Archival Paper Textures
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
-                      Soft Handmade Cotton · Crisp French Linen · Aged Parchment
-                    </div>
-                  </div>
-
-                  <div style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(212, 165, 116, 0.16)",
-                    borderRadius: 10,
-                    padding: "11px 14px",
-                  }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
-                      Velvet Lighting &amp; Gradients
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
-                      Classic Burgundy · Sunset Dusk · Velvet Aurora
-                    </div>
-                  </div>
-
-                  <div style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(212, 165, 116, 0.16)",
-                    borderRadius: 10,
-                    padding: "11px 14px",
-                  }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
-                      Intimate Hand-Drawn Motifs
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
-                      Midnight Constellations · Falling Petals · Heirloom Wild Roses
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style={{
-              marginTop: 24,
-              paddingTop: 16,
-              borderTop: "1px solid rgba(212,165,116,0.15)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              fontSize: 12.5,
-              color: "rgba(212,165,116,0.9)",
-              fontStyle: "italic",
-            }}>
-              ✦ My sleep schedule died so your most meaningful words don&apos;t have to live in a plain text message.
-            </div>
-          </div>
-
-          {/* ── SLIDE 2: SOUNDTRACK SHOWCASE & LIVE SONG SEARCH ── */}
+          {/* ── SLIDE 1: SOUNDTRACK SHOWCASE & LIVE SONG SEARCH ── */}
           <div style={{
             flex: "0 0 100%",
             minWidth: "100%",
