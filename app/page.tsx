@@ -888,7 +888,64 @@ function FaqAccordion({ faqs }: { faqs: { q: string; a: string }[] }) {
   );
 }
 
+const CAROUSEL_SLIDES = [
+  { id: "envelopes", label: "Wax Seals & Paper", icon: "🕯️", subtitle: "8 Wax Seals · 9 Papers" },
+  { id: "soundtracks", label: "Music & Audio", icon: "🎵", subtitle: "Live Search · 30s Preview" },
+  { id: "keepsakes", label: "Polaroid & Prints", icon: "📸", subtitle: "Framed PNG & Origami A4" },
+  { id: "vault", label: "Intimate Vault", icon: "🔒", subtitle: "Timelocks & Riddles" },
+  { id: "alerts", label: "Delivery & Alerts", icon: "⚡", subtitle: "Live Receipts & Killswitch" },
+  { id: "muse", label: "The Muse AI", icon: "✨", subtitle: "Writing Companion" },
+] as const;
+
 export default function HomePage() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSlide = (idx: number) => {
+    if (!carouselRef.current) return;
+    const container = carouselRef.current;
+    const item = container.children[idx] as HTMLElement;
+    if (item) {
+      container.scrollTo({
+        left: item.offsetLeft,
+        behavior: "smooth",
+      });
+      setActiveSlide(idx);
+    }
+  };
+
+  const prevSlide = () => {
+    const nextIdx = Math.max(0, activeSlide - 1);
+    scrollToSlide(nextIdx);
+  };
+
+  const nextSlide = () => {
+    const nextIdx = Math.min(CAROUSEL_SLIDES.length - 1, activeSlide + 1);
+    scrollToSlide(nextIdx);
+  };
+
+  const handleCarouselScroll = () => {
+    if (!carouselRef.current) return;
+    const container = carouselRef.current;
+    const scrollLeft = container.scrollLeft;
+    const children = Array.from(container.children) as HTMLElement[];
+    if (!children.length) return;
+
+    let closestIdx = 0;
+    let minDiff = Infinity;
+    children.forEach((child, idx) => {
+      const diff = Math.abs(child.offsetLeft - scrollLeft);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIdx = idx;
+      }
+    });
+
+    if (closestIdx !== activeSlide) {
+      setActiveSlide(closestIdx);
+    }
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <Navbar />
@@ -982,16 +1039,16 @@ export default function HomePage() {
         <InteractiveUnsealDemo />
       </div>
 
-      {/* ── EXCLUSIVE FEATURES: THE MUSE AI & LIVE MULTI-DEVICE TRACKING ── */}
+      {/* ── HORIZONTAL NATIVE SWIPE KEEPSAKE CAROUSEL (OPTION B) ── */}
       <section style={{
-        maxWidth: 1120,
+        maxWidth: 1140,
         margin: "0 auto",
         padding: "60px 20px 80px",
         position: "relative",
         zIndex: 1,
       }}>
         {/* Section Header */}
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{
             display: "inline-flex",
             alignItems: "center",
@@ -1007,1408 +1064,1436 @@ export default function HomePage() {
             padding: "5px 16px",
             borderRadius: 20,
           }}>
-            <span>✦</span> INTELLIGENT WRITING & LIVE DELIVERY
+            <span>✦</span> CRAFT &amp; INNOVATION CAROUSEL
           </div>
           <h2 style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontSize: "clamp(26px, 4.5vw, 38px)",
             fontWeight: 600,
             color: "#faf8f5",
-            margin: "0 0 14px",
+            margin: "0 0 12px",
             lineHeight: 1.25,
             letterSpacing: "0.01em",
           }}>
-            Crafted with Emotion. Tracked with Precision.
+            Swipe to Experience the Ritual.
           </h2>
           <p style={{
             fontSize: "clamp(14px, 2.5vw, 16.5px)",
             color: "rgba(250,248,245,0.7)",
-            maxWidth: 620,
+            maxWidth: 640,
             margin: "0 auto",
             lineHeight: 1.6,
           }}>
-            From meaningful words composed with our AI assistant to real-time unseal receipts and multi-device milestone intelligence.
+            Swipe horizontally on your phone or use the arrow controls below to explore each handcrafted detail.
           </p>
         </div>
 
-        {/* 2-Column Feature Grid */}
+        {/* Carousel Control Bar (Arrows + Progress Pill) */}
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 28,
-          alignItems: "stretch",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 16,
+          padding: "0 4px",
+          flexWrap: "wrap",
         }}>
-
-          {/* ── CARD 1: THE MUSE AI WRITING ASSISTANT ── */}
+          {/* Active Card Pill */}
           <div style={{
-            background: "linear-gradient(145deg, rgba(28, 10, 18, 0.88) 0%, rgba(16, 5, 11, 0.95) 100%)",
-            border: "1px solid rgba(212, 165, 116, 0.25)",
-            borderRadius: 20,
-            padding: "32px 28px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            boxShadow: "0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            background: "rgba(25, 10, 18, 0.8)",
+            border: "1px solid rgba(212, 165, 116, 0.3)",
+            padding: "6px 14px",
+            borderRadius: 16,
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#faf8f5",
           }}>
-            <div>
-              {/* Badge & Icon */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: "50%",
-                  background: "radial-gradient(circle at 35% 30%, #8b1824 0%, #4a0d14 100%)",
-                  border: "1px solid rgba(212,165,116,0.4)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 22,
-                }}>
-                  ✨
-                </div>
-                <span style={{
-                  fontSize: 11.5, color: "#d4a574",
-                  background: "rgba(212,165,116,0.12)",
-                  border: "1px solid rgba(212,165,116,0.25)",
-                  padding: "4px 12px", borderRadius: 20, fontWeight: 700, letterSpacing: "0.05em",
-                }}>
-                  AI WRITING COMPANION
-                </span>
-              </div>
-
-              <h3 style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: 24, fontWeight: 600, color: "#faf8f5", margin: "0 0 10px",
-              }}>
-                The Muse (AI Assistant)
-              </h3>
-              <p style={{ fontSize: 14.5, color: "rgba(250,248,245,0.72)", lineHeight: 1.6, margin: "0 0 22px" }}>
-                Find the right words when emotion runs deep. 1-tap heartfelt starters, text polishing, and dynamic title generation that sounds genuinely human.
-              </p>
-
-              {/* Interactive AI Preview Box */}
-              <div style={{
-                background: "rgba(8, 2, 6, 0.75)",
-                border: "1px solid rgba(212,165,116,0.2)",
-                borderRadius: 14,
-                padding: "16px 18px",
-                marginBottom: 20,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d4a574", fontWeight: 700 }}>
-                    ✦ Live Generation Example
-                  </span>
-                  <span style={{ fontSize: 11.5, color: "rgba(250,248,245,0.45)" }}>Prompt: &quot;miss our cricket matches&quot;</span>
-                </div>
-                <div style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "#d4a574",
-                  marginBottom: 6,
-                }}>
-                  Title: &ldquo;Missing Match Days&rdquo;
-                </div>
-                <p style={{
-                  fontSize: 13.5,
-                  color: "rgba(250,248,245,0.85)",
-                  fontFamily: "Georgia, serif",
-                  fontStyle: "italic",
-                  lineHeight: 1.55,
-                  margin: 0,
-                }}>
-                  &ldquo;I often think about the fun times we had watching cricket together, and it&apos;s just not the same without you. I really miss our discussions and the laughter we shared.&rdquo;
-                </p>
-              </div>
-
-              {/* Feature Points */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {[
-                  { icon: "💡", title: "Emotionally Intelligent Starters", text: "Turns raw notes into heartfelt handwriting without clichés." },
-                  { icon: "🏷️", title: "Context-Aware Titles", text: "Synthesizes creative, matching letter titles for your exact memories." },
-                  { icon: "✍️", title: "Polish & Finish Thoughts", text: "Refines messy drafts while preserving your authentic voice." },
-                ].map(item => (
-                  <div key={item.title} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <span style={{ fontSize: 15, lineHeight: 1.3 }}>{item.icon}</span>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: "#faf8f5" }}>{item.title}</div>
-                      <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.55)", lineHeight: 1.4 }}>{item.text}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-              <Link href="/create" style={{
-                color: "#d4a574", fontSize: 13.5, fontWeight: 600, textDecoration: "none",
-                display: "inline-flex", alignItems: "center", gap: 6,
-              }}>
-                Try The Muse in Composer →
-              </Link>
-            </div>
+            <span style={{ fontSize: 16 }}>{CAROUSEL_SLIDES[activeSlide].icon}</span>
+            <span>{CAROUSEL_SLIDES[activeSlide].label}</span>
+            <span style={{ color: "#d4a574", fontSize: 11, background: "rgba(212,165,116,0.15)", padding: "1px 6px", borderRadius: 8 }}>
+              {activeSlide + 1} / {CAROUSEL_SLIDES.length}
+            </span>
           </div>
 
-          {/* ── CARD 2: LIVE DELIVERY & MULTI-DEVICE TRACKING ── */}
-          <div style={{
-            background: "linear-gradient(145deg, rgba(28, 10, 18, 0.88) 0%, rgba(16, 5, 11, 0.95) 100%)",
-            border: "1px solid rgba(228, 32, 56, 0.28)",
-            borderRadius: 20,
-            padding: "32px 28px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            boxShadow: "0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
-          }}>
-            <div>
-              {/* Badge & Icon */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: "50%",
-                  background: "radial-gradient(circle at 35% 30%, #ff2b47 0%, #8b1824 100%)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 22,
-                }}>
-                  📱
-                </div>
-                <span style={{
-                  fontSize: 11.5, color: "#5ae08a",
-                  background: "rgba(40,160,80,0.15)",
-                  border: "1px solid rgba(70,210,110,0.35)",
-                  padding: "4px 12px", borderRadius: 20, fontWeight: 700, letterSpacing: "0.05em",
-                }}>
-                  LIVE DASHBOARD
-                </span>
-              </div>
-
-              <h3 style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: 24, fontWeight: 600, color: "#faf8f5", margin: "0 0 10px",
-              }}>
-                Live Delivery &amp; Multi-Device Tracking
-              </h3>
-              <p style={{ fontSize: 14.5, color: "rgba(250,248,245,0.72)", lineHeight: 1.6, margin: "0 0 18px" }}>
-                Know the exact second your words are read. Real-time unseal receipts, anti-spam unique device counting, and shared link detection.
-              </p>
-
-              {/* Realistic Visual Stats Grid Showcase */}
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gap: 8,
-                marginBottom: 16,
-              }}>
-                <div style={{
-                  background: "rgba(10, 4, 8, 0.75)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 10,
-                  padding: "10px 8px",
-                  textAlign: "center",
-                }}>
-                  <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(212,165,116,0.7)" }}>🔒 SEAL</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#5ae08a", marginTop: 2 }}>Opened</div>
-                  <div style={{ fontSize: 10.5, color: "rgba(250,248,245,0.45)", marginTop: 2 }}>Live status</div>
-                </div>
-
-                <div style={{
-                  background: "rgba(10, 4, 8, 0.75)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 10,
-                  padding: "10px 8px",
-                  textAlign: "center",
-                }}>
-                  <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(212,165,116,0.7)" }}>👁 READERS</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#faf8f5", marginTop: 2 }}>1 Device</div>
-                  <div style={{ fontSize: 10.5, color: "rgba(250,248,245,0.45)", marginTop: 2 }}>Re-read 3x</div>
-                </div>
-
-                <div style={{
-                  background: "rgba(10, 4, 8, 0.75)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 10,
-                  padding: "10px 8px",
-                  textAlign: "center",
-                }}>
-                  <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(212,165,116,0.7)" }}>🛡 ATTEMPTS</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#faf8f5", marginTop: 2 }}>0</div>
-                  <div style={{ fontSize: 10.5, color: "rgba(250,248,245,0.45)", marginTop: 2 }}>Guarded</div>
-                </div>
-
-                <div style={{
-                  background: "rgba(10, 4, 8, 0.75)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 10,
-                  padding: "10px 8px",
-                  textAlign: "center",
-                }}>
-                  <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(212,165,116,0.7)" }}>💖 REACTION</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#ff2b47", marginTop: 2 }}>❤️</div>
-                  <div style={{ fontSize: 10.5, color: "rgba(250,248,245,0.45)", marginTop: 2 }}>Loved it</div>
-                </div>
-              </div>
-
-              {/* Realistic Activity Timeline Mini-Log */}
-              <div style={{
-                background: "rgba(8, 2, 6, 0.75)",
-                border: "1px solid rgba(228,32,56,0.2)",
-                borderRadius: 12,
-                padding: "12px 14px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
-                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d4a574", fontWeight: 700, display: "flex", alignItems: "center", gap: 5 }}>
-                    <span>📜</span> Letter Activity Timeline
-                  </span>
-                  <span style={{ fontSize: 10.5, color: "#5ae08a", display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#5ae08a", display: "inline-block" }} />
-                    Auto-syncing
-                  </span>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
-                  <span style={{ color: "#d4a574" }}>✦</span>
-                  <span style={{ color: "#faf8f5", fontWeight: 600 }}>Letter sealed &amp; created</span>
-                  <span style={{ color: "rgba(250,248,245,0.4)", marginLeft: "auto", fontSize: 11 }}>10:24 PM</span>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
-                  <span style={{ color: "#38bdf8" }}>📱</span>
-                  <span style={{ color: "#faf8f5", fontWeight: 600 }}>Letter opened on iPhone</span>
-                  <span style={{ color: "rgba(250,248,245,0.4)", marginLeft: "auto", fontSize: 11 }}>10:28 PM</span>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
-                  <span style={{ color: "#5ae08a" }}>💌</span>
-                  <span style={{ color: "#5ae08a", fontWeight: 600 }}>Wax seal broken &amp; read</span>
-                  <span style={{ color: "rgba(250,248,245,0.4)", marginLeft: "auto", fontSize: 11 }}>10:29 PM</span>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
-                  <span style={{ color: "#f59e0b" }}>🔗</span>
-                  <span style={{ color: "#faf8f5", fontWeight: 600 }}>Opened on new device (Mac)</span>
-                  <span style={{ color: "rgba(250,248,245,0.4)", marginLeft: "auto", fontSize: 11 }}>10:35 PM</span>
-                </div>
-              </div>
-
-              {/* Bullet highlights */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 16 }}>
-                <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ color: "#5ae08a" }}>✓</span> <strong>Instant Unseal Receipts:</strong> Email alert the exact second the wax seal is broken (when you provide an email and enable alerts).
-                </div>
-                <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ color: "#5ae08a" }}>✓</span> <strong>Device Intelligence:</strong> Detects iPhone, Android, Mac, or Windows PC opens.
-                </div>
-                <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ color: "#5ae08a" }}>✓</span> <strong>Anti-Spam Unique Readers:</strong> Counts genuine readers without page reload inflation.
-                </div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-              <Link href="/create" style={{
-                color: "#ff2b47", fontSize: 13.5, fontWeight: 600, textDecoration: "none",
-                display: "inline-flex", alignItems: "center", gap: 6,
-              }}>
-                Compose &amp; Track Your First Letter →
-              </Link>
-            </div>
-          </div>
-
-        </div>
-
-        {/* ── FLAGSHIP SONG SELECTION & SOUNDTRACK SHOWCASE ── */}
-        <LandingMusicShowcase />
-
-        {/* ── REAL-TIME EMAIL INTELLIGENCE & INSTANT ALERTS SHOWCASE ── */}
-        <div style={{
-          background: "linear-gradient(145deg, rgba(28, 10, 18, 0.92) 0%, rgba(14, 4, 10, 0.96) 100%)",
-          border: "1px solid rgba(212, 165, 116, 0.28)",
-          borderRadius: 20,
-          padding: "36px 30px",
-          marginTop: 32,
-          boxShadow: "0 16px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
-          position: "relative",
-          overflow: "hidden",
-        }}>
-          {/* Subtle gold / red ambient glow */}
-          <div style={{
-            position: "absolute", top: -50, right: -50, width: 260, height: 260,
-            background: "radial-gradient(circle, rgba(196,30,58,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }} />
-
-          {/* Section Header */}
-          <div style={{ marginBottom: 30 }}>
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 11.5,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "#d4a574",
-              marginBottom: 10,
-              background: "rgba(212,165,116,0.08)",
-              border: "1px solid rgba(212,165,116,0.22)",
-              padding: "4px 14px",
-              borderRadius: 20,
-            }}>
-              <span>✦</span> REAL-TIME EMAIL INTELLIGENCE
-            </div>
-            <h3 style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: "clamp(24px, 4vw, 32px)",
-              fontWeight: 600,
-              color: "#faf8f5",
-              margin: "0 0 8px",
-              lineHeight: 1.25,
-            }}>
-              Never Wonder If They Opened It. Instant Email Receipts.
-            </h3>
-            <p style={{
-              fontSize: 14.5,
-              color: "rgba(250,248,245,0.72)",
-              maxWidth: 680,
-              lineHeight: 1.55,
-              margin: 0,
-            }}>
-              Provide your email in the composer to receive discreet, beautifully formatted alerts the exact second your words touch their hands.
-            </p>
-          </div>
-
-          {/* 2-Column Showcase: Left Live Inbox Simulation / Right Alert Features Grid */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
-            gap: 28,
-            alignItems: "stretch",
-          }}>
-
-            {/* Left: Simulated Inbox Notifications Stream */}
-            <div style={{
-              background: "rgba(10, 3, 7, 0.8)",
-              border: "1px solid rgba(212,165,116,0.22)",
-              borderRadius: 16,
-              padding: "20px 18px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-            }}>
-              <div style={{
+          {/* Nav Arrows */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              type="button"
+              onClick={prevSlide}
+              disabled={activeSlide === 0}
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: "50%",
+                background: activeSlide === 0 ? "rgba(255,255,255,0.04)" : "rgba(25, 10, 18, 0.9)",
+                border: `1.5px solid ${activeSlide === 0 ? "rgba(255,255,255,0.1)" : "rgba(212,165,116,0.5)"}`,
+                color: activeSlide === 0 ? "rgba(255,255,255,0.2)" : "#d4a574",
+                fontSize: 16,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
-                paddingBottom: 10,
-                borderBottom: "1px solid rgba(255,255,255,0.08)",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>📫</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#faf8f5" }}>
-                    Your Inbox · Live Alerts
-                  </span>
-                </div>
-                <span style={{
-                  fontSize: 10.5, color: "#5ae08a",
-                  background: "rgba(40,160,80,0.18)",
-                  border: "1px solid rgba(70,210,110,0.3)",
-                  padding: "2px 8px", borderRadius: 10, fontWeight: 600,
-                  display: "flex", alignItems: "center", gap: 4,
-                }}>
-                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#5ae08a" }} />
-                  Active
-                </span>
-              </div>
+                justifyContent: "center",
+                cursor: activeSlide === 0 ? "not-allowed" : "pointer",
+                transition: "all 0.2s ease",
+              }}
+              title="Previous Feature"
+            >
+              ←
+            </button>
 
-              {/* Simulated Notification 1: Seal Broken */}
-              <div style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(212,165,116,0.25)",
-                borderRadius: 12,
-                padding: "12px 14px",
+            <button
+              type="button"
+              onClick={nextSlide}
+              disabled={activeSlide === CAROUSEL_SLIDES.length - 1}
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: "50%",
+                background: activeSlide === CAROUSEL_SLIDES.length - 1 ? "rgba(255,255,255,0.04)" : "rgba(25, 10, 18, 0.9)",
+                border: `1.5px solid ${activeSlide === CAROUSEL_SLIDES.length - 1 ? "rgba(255,255,255,0.1)" : "rgba(212,165,116,0.5)"}`,
+                color: activeSlide === CAROUSEL_SLIDES.length - 1 ? "rgba(255,255,255,0.2)" : "#d4a574",
+                fontSize: 16,
                 display: "flex",
-                gap: 12,
-                alignItems: "flex-start",
-              }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: "50%",
-                  background: "radial-gradient(circle at 35% 30%, #c41e3a 0%, #6b101b 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, flexShrink: 0,
-                  boxShadow: "0 2px 8px rgba(196,30,58,0.4)",
-                }}>
-                  💌
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>Letter Unsealed &amp; Read</span>
-                    <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>Just now</span>
-                  </div>
-                  <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
-                    Your recipient broke the wax seal on <strong style={{ color: "#d4a574" }}>iPhone</strong>. Audio started playing.
-                  </div>
-                </div>
-              </div>
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: activeSlide === CAROUSEL_SLIDES.length - 1 ? "not-allowed" : "pointer",
+                transition: "all 0.2s ease",
+              }}
+              title="Next Feature"
+            >
+              →
+            </button>
+          </div>
+        </div>
 
-              {/* Simulated Notification 2: Reaction Received */}
+        {/* Horizontal Native Swipe Rail */}
+        <div
+          ref={carouselRef}
+          onScroll={handleCarouselScroll}
+          style={{
+            display: "flex",
+            gap: 20,
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            scrollBehavior: "smooth",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            padding: "8px 2px 20px",
+          }}
+        >
+          {/* ── SLIDE 1: ARTISAN ENVELOPES & PAPER THEMES ── */}
+          <div style={{
+            flex: "0 0 100%",
+            minWidth: "100%",
+            scrollSnapAlign: "start",
+            boxSizing: "border-box",
+            background: "linear-gradient(145deg, rgba(24, 9, 16, 0.94) 0%, rgba(12, 3, 8, 0.98) 100%)",
+            border: "1px solid rgba(212, 165, 116, 0.28)",
+            borderRadius: 20,
+            padding: "36px 28px",
+            boxShadow: "0 16px 44px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", top: -30, right: -30, width: 280, height: 280,
+              background: "radial-gradient(circle, rgba(196, 30, 58, 0.15) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }} />
+
+            <div style={{ marginBottom: 28 }}>
               <div style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 12,
-                padding: "12px 14px",
-                display: "flex",
-                gap: 12,
-                alignItems: "flex-start",
-              }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: "50%",
-                  background: "radial-gradient(circle at 35% 30%, #ec4899 0%, #831843 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, flexShrink: 0,
-                }}>
-                  💖
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>New Emotional Reaction</span>
-                    <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>2m ago</span>
-                  </div>
-                  <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
-                    Recipient reacted: <strong style={{ color: "#f472b6" }}>&ldquo;Loved it ❤️&rdquo;</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Simulated Notification 3: Secret Reply Sealed */}
-              <div style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(70,210,110,0.22)",
-                borderRadius: 12,
-                padding: "12px 14px",
-                display: "flex",
-                gap: 12,
-                alignItems: "flex-start",
-              }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: "50%",
-                  background: "radial-gradient(circle at 35% 30%, #059669 0%, #064e3b 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, flexShrink: 0,
-                }}>
-                  📬
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>Sealed Response Received</span>
-                    <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>5m ago</span>
-                  </div>
-                  <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
-                    They wrote back and sealed a private reply. Click to unseal.
-                  </div>
-                </div>
-              </div>
-
-              {/* Simulated Notification 4: Shared Link / 2nd Device */}
-              <div style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.06)",
-                borderRadius: 12,
-                padding: "12px 14px",
-                display: "flex",
-                gap: 12,
-                alignItems: "flex-start",
-              }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: "50%",
-                  background: "radial-gradient(circle at 35% 30%, #3b82f6 0%, #1e3a8a 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, flexShrink: 0,
-                }}>
-                  🔗
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>Shared Link Opened</span>
-                    <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>12m ago</span>
-                  </div>
-                  <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
-                    Letter was opened on a new device (<strong style={{ color: "#60a5fa" }}>Mac</strong>).
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: The 4 Core Email Alert Features */}
-            <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 14 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {/* Feature 1 */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.6)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 14,
-                  padding: "16px 18px",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <span style={{ color: "#d4a574", fontSize: 14 }}>⚡</span>
-                    <h4 style={{ fontSize: 15, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      Instant Unseal Receipts
-                    </h4>
-                  </div>
-                  <p style={{ fontSize: 13, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.45 }}>
-                    Sent the exact second the wax seal is broken. Pinpoints whether opened on <strong style={{ color: "#d4a574" }}>iPhone, Android, Mac, or PC</strong>.
-                  </p>
-                </div>
-
-                {/* Feature 2 */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.6)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 14,
-                  padding: "16px 18px",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <span style={{ color: "#f472b6", fontSize: 14 }}>💖</span>
-                    <h4 style={{ fontSize: 15, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      Heartfelt Reaction Alerts
-                    </h4>
-                  </div>
-                  <p style={{ fontSize: 13, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.45 }}>
-                    Discover how they felt in real time when they tap emotional reactions after reading your words.
-                  </p>
-                </div>
-
-                {/* Feature 3 */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.6)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 14,
-                  padding: "16px 18px",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <span style={{ color: "#5ae08a", fontSize: 14 }}>📬</span>
-                    <h4 style={{ fontSize: 15, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      Two-Way Secret Reply Delivery
-                    </h4>
-                  </div>
-                  <p style={{ fontSize: 13, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.45 }}>
-                    When your recipient writes and seals a response, you get an immediate email with a direct unseal link.
-                  </p>
-                </div>
-
-                {/* Feature 4 */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.6)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 14,
-                  padding: "16px 18px",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <span style={{ color: "#60a5fa", fontSize: 14 }}>🔗</span>
-                    <h4 style={{ fontSize: 15, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      Shared Link &amp; Multi-Device Alerts
-                    </h4>
-                  </div>
-                  <p style={{ fontSize: 13, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.45 }}>
-                    Alerts you if the private link is re-opened on a secondary computer, phone, or forwarded to someone else.
-                  </p>
-                </div>
-
-                {/* Feature 5: Self-Destruct Killswitch */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.6)",
-                  border: "1px solid rgba(228,32,56,0.22)",
-                  borderRadius: 14,
-                  padding: "16px 18px",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <span style={{ color: "#ff6b7d", fontSize: 14 }}>🔥</span>
-                    <h4 style={{ fontSize: 15, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      1-Tap Self-Destruct Killswitch
-                    </h4>
-                  </div>
-                  <p style={{ fontSize: 13, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.45 }}>
-                    Changed your mind? Use the private link sent to your email to permanently vaporize your letter, photos, and voice notes anytime.
-                  </p>
-                </div>
-              </div>
-
-              {/* Privacy / Opt-in reassurance footer */}
-              <div style={{
-                fontSize: 12,
-                color: "rgba(250,248,245,0.55)",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                paddingTop: 8,
-              }}>
-                <span style={{ color: "#5ae08a" }}>✓</span> 100% Private · 1-Tap Self-Destruct · Zero spam · No passwords required — simply enter your email in the composer.
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* ── TANGIBLE KEEPSAKES & PHYSICAL/DIGITAL EXPORTS SHOWCASE ── */}
-        <div style={{
-          background: "linear-gradient(145deg, rgba(28, 10, 18, 0.92) 0%, rgba(14, 4, 10, 0.96) 100%)",
-          border: "1px solid rgba(212, 165, 116, 0.28)",
-          borderRadius: 20,
-          padding: "36px 30px",
-          marginTop: 32,
-          boxShadow: "0 16px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
-          position: "relative",
-          overflow: "hidden",
-        }}>
-          {/* Subtle amber ambient glow */}
-          <div style={{
-            position: "absolute", top: -40, left: -40, width: 260, height: 260,
-            background: "radial-gradient(circle, rgba(212,165,116,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }} />
-
-          {/* Section Header */}
-          <div style={{ marginBottom: 32 }}>
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 11.5,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "#d4a574",
-              marginBottom: 10,
-              background: "rgba(212,165,116,0.08)",
-              border: "1px solid rgba(212,165,116,0.22)",
-              padding: "4px 14px",
-              borderRadius: 20,
-            }}>
-              <span>✦</span> TANGIBLE KEEPSAKES &amp; MEMORIES
-            </div>
-            <h3 style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: "clamp(24px, 4vw, 32px)",
-              fontWeight: 600,
-              color: "#faf8f5",
-              margin: "0 0 8px",
-              lineHeight: 1.25,
-            }}>
-              Carry It Digitally. Hold It Physically.
-            </h3>
-            <p style={{
-              fontSize: 14.5,
-              color: "rgba(250,248,245,0.72)",
-              maxWidth: 700,
-              lineHeight: 1.55,
-              margin: 0,
-            }}>
-              Attach photographic memories to your stationery, download framed keepsake cards, or print foldable origami envelopes to hold in real life.
-            </p>
-          </div>
-
-          {/* 2-Column Showcase */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
-            gap: 32,
-            alignItems: "center",
-          }}>
-
-            {/* Left: Realistic Vintage Polaroid Keepsake (SSR Demo) */}
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              background: "rgba(10, 3, 7, 0.75)",
-              border: "1px solid rgba(212,165,116,0.22)",
-              borderRadius: 20,
-              padding: "30px 20px 24px",
-              boxShadow: "0 14px 36px rgba(0,0,0,0.6)",
-              position: "relative",
-            }}>
-              {/* Top Tag */}
-              <div style={{
-                fontSize: 11,
-                color: "#d4a574",
+                fontSize: 11.5,
                 fontWeight: 700,
-                letterSpacing: "0.08em",
+                letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                background: "rgba(212,165,116,0.12)",
-                border: "1px solid rgba(212,165,116,0.25)",
-                padding: "3px 12px",
-                borderRadius: 14,
-                marginBottom: 20,
+                color: "#d4a574",
+                marginBottom: 10,
+                background: "rgba(212,165,116,0.08)",
+                border: "1px solid rgba(212,165,116,0.22)",
+                padding: "4px 14px",
+                borderRadius: 20,
               }}>
-                📸 Attached Photo Keepsake
+                <span>✦</span> SOLO CREATOR&apos;S STUDIO
               </div>
-
-              {/* Tilted Vintage Polaroid Frame */}
-              <div style={{
-                background: "#fdfbf7",
-                padding: "14px 14px 22px",
-                borderRadius: 4,
-                boxShadow: "0 18px 45px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.3)",
-                transform: "rotate(-2deg)",
-                maxWidth: 290,
-                width: "100%",
-                border: "1px solid rgba(200, 184, 163, 0.6)",
-                position: "relative",
-                transition: "transform 0.3s ease",
+              <h3 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "clamp(24px, 4vw, 32px)",
+                fontWeight: 600,
+                color: "#faf8f5",
+                margin: "0 0 10px",
+                lineHeight: 1.25,
               }}>
-                {/* Washi tape visual accent at top */}
-                <div style={{
-                  position: "absolute",
-                  top: -10,
-                  left: "50%",
-                  transform: "translateX(-50%) rotate(2deg)",
-                  width: 70,
-                  height: 20,
-                  background: "rgba(212, 165, 116, 0.45)",
-                  backdropFilter: "blur(4px)",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                }} />
-
-                {/* Photo */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/ssr-memory.jpg"
-                  alt="Sushant Singh Rajput memory keepsake"
-                  style={{
-                    width: "100%",
-                    height: 240,
-                    objectFit: "cover",
-                    borderRadius: 2,
-                    display: "block",
-                    filter: "contrast(1.03) saturate(1.05)",
-                  }}
-                />
-
-                {/* Handwritten cursive caption */}
-                <div style={{
-                  fontFamily: "'Dancing Script', cursive",
-                  fontSize: 18,
-                  color: "#3a2d24",
-                  marginTop: 12,
-                  textAlign: "center",
-                  fontWeight: 600,
-                  letterSpacing: "0.02em",
-                }}>
-                  “A photo that says what words can't”
-                </div>
-              </div>
-
-              <div style={{
-                marginTop: 22,
-                fontSize: 12,
-                color: "rgba(250,248,245,0.65)",
-                textAlign: "center",
-                fontStyle: "italic",
+                Lost An Unreasonable Amount of Sleep Over These Envelopes.
+              </h3>
+              <p style={{
+                fontSize: 14.5,
+                color: "rgba(250,248,245,0.75)",
+                maxWidth: 740,
+                lineHeight: 1.6,
+                margin: 0,
               }}>
-                Renders below your handwritten letter when the wax seal is broken.
-              </div>
+                I hand-crafted this entire stationery collection from scratch because an intimate letter shouldn&apos;t look like a boring chat bubble. Every 3D wax drip, linen texture, and ribbon was tuned by hand so opening your letter feels like a slow, unforgettable ritual.
+              </p>
             </div>
 
-            {/* Right: Keepsake Download Features */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-              {/* Feature 1: Framed Keepsake Card PNG */}
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
+              gap: 24,
+            }}>
+              {/* Column 1: 8 Handcrafted Envelope Styles */}
               <div style={{
-                background: "rgba(10, 3, 7, 0.6)",
-                border: "1px solid rgba(212,165,116,0.22)",
+                background: "rgba(10, 3, 7, 0.7)",
+                border: "1px solid rgba(212,165,116,0.2)",
                 borderRadius: 16,
-                padding: "20px 22px",
+                padding: "22px 20px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 8,
+                gap: 14,
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 20 }}>🖼️</span>
+                    <span style={{ fontSize: 20 }}>💌</span>
                     <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      Download Framed Keepsake Card (PNG)
+                      8 Bespoke Envelope Rituals
                     </h4>
                   </div>
                   <span style={{
-                    fontSize: 10.5, color: "#d4a574",
+                    fontSize: 11, color: "#d4a574",
                     background: "rgba(212,165,116,0.12)",
                     border: "1px solid rgba(212,165,116,0.25)",
                     padding: "2px 8px", borderRadius: 10, fontWeight: 600,
                   }}>
-                    Digital HD
+                    Interactive Wax Seals
                   </span>
                 </div>
-                <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.72)", margin: 0, lineHeight: 1.5 }}>
-                  Export your entire unsealed letter, handwriting, signature, wax seal, and attached photo keepsake as an ultra-high-resolution framed image. Perfect for saving to your camera roll or setting as wallpaper.
-                </p>
+
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: 10,
+                }}>
+                  {[
+                    { name: "Classic Wax Seal", icon: "🕯️" },
+                    { name: "Twine & Botanical", icon: "🌿" },
+                    { name: "Gold Wax Drip", icon: "✨" },
+                    { name: "Silk Ribbon", icon: "🎀" },
+                    { name: "Vintage Crest", icon: "👑" },
+                    { name: "Floral Washi", icon: "🌸" },
+                    { name: "Lace & Pearl", icon: "🦪" },
+                    { name: "Velvet & Tassel", icon: "🧵" },
+                  ].map((env) => (
+                    <div
+                      key={env.name}
+                      style={{
+                        background: "rgba(255, 255, 255, 0.03)",
+                        border: "1px solid rgba(212, 165, 116, 0.16)",
+                        borderRadius: 10,
+                        padding: "10px 12px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <span style={{ fontSize: 15 }}>{env.icon}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>{env.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Feature 2: Printable Foldable Origami Envelope PDF */}
+              {/* Column 2: 9 Tactile Paper Canvases */}
               <div style={{
-                background: "rgba(10, 3, 7, 0.6)",
-                border: "1px solid rgba(212,165,116,0.22)",
+                background: "rgba(10, 3, 7, 0.7)",
+                border: "1px solid rgba(212,165,116,0.2)",
                 borderRadius: 16,
-                padding: "20px 22px",
+                padding: "22px 20px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 8,
+                gap: 14,
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 20 }}>🖨️</span>
+                    <span style={{ fontSize: 20 }}>📜</span>
                     <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                      Download Printable Foldable Origami Envelope (A4 PDF)
+                      9 Tactile Stationery Canvases
                     </h4>
+                  </div>
+                  <span style={{
+                    fontSize: 11, color: "#5ae08a",
+                    background: "rgba(40,160,80,0.18)",
+                    border: "1px solid rgba(70,210,110,0.3)",
+                    padding: "2px 8px", borderRadius: 10, fontWeight: 600,
+                  }}>
+                    Real Paper Grain
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{
+                    background: "rgba(255, 255, 255, 0.03)",
+                    border: "1px solid rgba(212, 165, 116, 0.16)",
+                    borderRadius: 10,
+                    padding: "11px 14px",
+                  }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
+                      Archival Paper Textures
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
+                      Soft Handmade Cotton · Crisp French Linen · Aged Parchment
+                    </div>
+                  </div>
+
+                  <div style={{
+                    background: "rgba(255, 255, 255, 0.03)",
+                    border: "1px solid rgba(212, 165, 116, 0.16)",
+                    borderRadius: 10,
+                    padding: "11px 14px",
+                  }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
+                      Velvet Lighting &amp; Gradients
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
+                      Classic Burgundy · Sunset Dusk · Velvet Aurora
+                    </div>
+                  </div>
+
+                  <div style={{
+                    background: "rgba(255, 255, 255, 0.03)",
+                    border: "1px solid rgba(212, 165, 116, 0.16)",
+                    borderRadius: 10,
+                    padding: "11px 14px",
+                  }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
+                      Intimate Hand-Drawn Motifs
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
+                      Midnight Constellations · Falling Petals · Heirloom Wild Roses
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              marginTop: 24,
+              paddingTop: 16,
+              borderTop: "1px solid rgba(212,165,116,0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              fontSize: 12.5,
+              color: "rgba(212,165,116,0.9)",
+              fontStyle: "italic",
+            }}>
+              ✦ My sleep schedule died so your most meaningful words don&apos;t have to live in a plain text message.
+            </div>
+          </div>
+
+          {/* ── SLIDE 2: SOUNDTRACK SHOWCASE & LIVE SONG SEARCH ── */}
+          <div style={{
+            flex: "0 0 100%",
+            minWidth: "100%",
+            scrollSnapAlign: "start",
+            boxSizing: "border-box",
+          }}>
+            <LandingMusicShowcase />
+          </div>
+
+          {/* ── SLIDE 3: TANGIBLE KEEPSAKES & EXPORTS ── */}
+          <div style={{
+            flex: "0 0 100%",
+            minWidth: "100%",
+            scrollSnapAlign: "start",
+            boxSizing: "border-box",
+            background: "linear-gradient(145deg, rgba(28, 10, 18, 0.92) 0%, rgba(14, 4, 10, 0.96) 100%)",
+            border: "1px solid rgba(212, 165, 116, 0.28)",
+            borderRadius: 20,
+            padding: "36px 28px",
+            boxShadow: "0 16px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", top: -40, left: -40, width: 260, height: 260,
+              background: "radial-gradient(circle, rgba(212,165,116,0.15) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }} />
+
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 11.5,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "#d4a574",
+                marginBottom: 10,
+                background: "rgba(212,165,116,0.08)",
+                border: "1px solid rgba(212,165,116,0.22)",
+                padding: "4px 14px",
+                borderRadius: 20,
+              }}>
+                <span>✦</span> TANGIBLE KEEPSAKES &amp; MEMORIES
+              </div>
+              <h3 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "clamp(24px, 4vw, 32px)",
+                fontWeight: 600,
+                color: "#faf8f5",
+                margin: "0 0 8px",
+                lineHeight: 1.25,
+              }}>
+                Carry It Digitally. Hold It Physically.
+              </h3>
+              <p style={{
+                fontSize: 14.5,
+                color: "rgba(250,248,245,0.72)",
+                maxWidth: 700,
+                lineHeight: 1.55,
+                margin: 0,
+              }}>
+                Attach photographic memories to your stationery, download framed keepsake cards, or print foldable origami envelopes to hold in real life.
+              </p>
+            </div>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
+              gap: 32,
+              alignItems: "center",
+            }}>
+              {/* Left: Realistic Vintage Polaroid Keepsake */}
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                background: "rgba(10, 3, 7, 0.75)",
+                border: "1px solid rgba(212,165,116,0.22)",
+                borderRadius: 20,
+                padding: "30px 20px 24px",
+                boxShadow: "0 14px 36px rgba(0,0,0,0.6)",
+                position: "relative",
+              }}>
+                <div style={{
+                  fontSize: 11,
+                  color: "#d4a574",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  background: "rgba(212,165,116,0.12)",
+                  border: "1px solid rgba(212,165,116,0.25)",
+                  padding: "3px 12px",
+                  borderRadius: 14,
+                  marginBottom: 20,
+                }}>
+                  📸 Attached Photo Keepsake
+                </div>
+
+                <div style={{
+                  background: "#fdfbf7",
+                  padding: "14px 14px 22px",
+                  borderRadius: 4,
+                  boxShadow: "0 18px 45px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.3)",
+                  transform: "rotate(-2deg)",
+                  maxWidth: 290,
+                  width: "100%",
+                  border: "1px solid rgba(200, 184, 163, 0.6)",
+                  position: "relative",
+                }}>
+                  <div style={{
+                    position: "absolute",
+                    top: -10,
+                    left: "50%",
+                    transform: "translateX(-50%) rotate(2deg)",
+                    width: 70,
+                    height: 20,
+                    background: "rgba(212, 165, 116, 0.45)",
+                    backdropFilter: "blur(4px)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                  }} />
+
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/ssr-memory.jpg"
+                    alt="Sushant Singh Rajput memory keepsake"
+                    style={{
+                      width: "100%",
+                      height: 240,
+                      objectFit: "cover",
+                      borderRadius: 2,
+                      display: "block",
+                      filter: "contrast(1.03) saturate(1.05)",
+                    }}
+                  />
+
+                  <div style={{
+                    fontFamily: "'Dancing Script', cursive",
+                    fontSize: 18,
+                    color: "#3a2d24",
+                    marginTop: 12,
+                    textAlign: "center",
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                  }}>
+                    &ldquo;A photo that says what words can&apos;t&rdquo;
+                  </div>
+                </div>
+
+                <div style={{
+                  marginTop: 22,
+                  fontSize: 12,
+                  color: "rgba(250,248,245,0.65)",
+                  textAlign: "center",
+                  fontStyle: "italic",
+                }}>
+                  Renders below your handwritten letter when the wax seal is broken.
+                </div>
+              </div>
+
+              {/* Right: Keepsake Download Features */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div style={{
+                  background: "rgba(10, 3, 7, 0.6)",
+                  border: "1px solid rgba(212,165,116,0.22)",
+                  borderRadius: 16,
+                  padding: "20px 22px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 20 }}>🖼️</span>
+                      <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
+                        Download Framed Keepsake Card (PNG)
+                      </h4>
+                    </div>
+                    <span style={{
+                      fontSize: 10.5, color: "#d4a574",
+                      background: "rgba(212,165,116,0.12)",
+                      border: "1px solid rgba(212,165,116,0.25)",
+                      padding: "2px 8px", borderRadius: 10, fontWeight: 600,
+                    }}>
+                      Digital HD
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.72)", margin: 0, lineHeight: 1.5 }}>
+                    Export your entire unsealed letter, handwriting, signature, wax seal, and attached photo keepsake as an ultra-high-resolution framed image. Perfect for saving to your camera roll or setting as wallpaper.
+                  </p>
+                </div>
+
+                <div style={{
+                  background: "rgba(10, 3, 7, 0.6)",
+                  border: "1px solid rgba(212,165,116,0.22)",
+                  borderRadius: 16,
+                  padding: "20px 22px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 20 }}>🖨️</span>
+                      <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
+                        Download Printable Foldable Origami Envelope (A4 PDF)
+                      </h4>
+                    </div>
+                    <span style={{
+                      fontSize: 10.5, color: "#5ae08a",
+                      background: "rgba(40,160,80,0.18)",
+                      border: "1px solid rgba(70,210,110,0.3)",
+                      padding: "2px 8px", borderRadius: 10, fontWeight: 600,
+                    }}>
+                      Physical Print
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.72)", margin: 0, lineHeight: 1.5 }}>
+                    Turn your digital letter into a physical tangible memory. Generates a ready-to-print A4 PDF template with fold lines so you or your recipient can fold a real origami envelope at home.
+                  </p>
+                </div>
+
+                <div style={{
+                  background: "rgba(10, 3, 7, 0.6)",
+                  border: "1px solid rgba(212,165,116,0.22)",
+                  borderRadius: 16,
+                  padding: "16px 22px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                }}>
+                  <span style={{ fontSize: 18 }}>📸</span>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#faf8f5" }}>
+                      Attach Any Photo In 1-Tap
+                    </div>
+                    <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.65)", lineHeight: 1.4 }}>
+                      Upload any photo directly in the composer. Photos render as authentic Polaroids with gentle tilt and handwritten captions.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── SLIDE 4: INTIMATE RITUALS & VAULT SECURITY ── */}
+          <div style={{
+            flex: "0 0 100%",
+            minWidth: "100%",
+            scrollSnapAlign: "start",
+            boxSizing: "border-box",
+            background: "linear-gradient(145deg, rgba(28, 10, 18, 0.92) 0%, rgba(14, 4, 10, 0.96) 100%)",
+            border: "1px solid rgba(212, 165, 116, 0.28)",
+            borderRadius: 20,
+            padding: "36px 28px",
+            boxShadow: "0 16px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            <div style={{ marginBottom: 28, textAlign: "center" }}>
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 11.5,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "#d4a574",
+                marginBottom: 10,
+                background: "rgba(212,165,116,0.08)",
+                border: "1px solid rgba(212,165,116,0.2)",
+                padding: "4px 14px",
+                borderRadius: 20,
+              }}>
+                <span>✦</span> INTIMATE RITUALS &amp; VAULT SECURITY
+              </div>
+              <h3 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "clamp(24px, 4vw, 32px)",
+                fontWeight: 600,
+                color: "#faf8f5",
+                margin: "0 0 10px",
+                lineHeight: 1.25,
+              }}>
+                More Than Just Words. A Sacred Experience.
+              </h3>
+              <p style={{
+                fontSize: 14.5,
+                color: "rgba(250,248,245,0.7)",
+                maxWidth: 560,
+                margin: "0 auto",
+                lineHeight: 1.55,
+              }}>
+                From private memory riddles and timed countdown vaults to intimate handwritten replies sealed in return.
+              </p>
+            </div>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: 24,
+              alignItems: "stretch",
+            }}>
+              {/* CARD 1: GUARDIAN QUESTION LOCK */}
+              <div style={{
+                background: "rgba(10, 3, 7, 0.75)",
+                border: "1px solid rgba(212, 165, 116, 0.22)",
+                borderRadius: 18,
+                padding: "24px 20px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: "50%",
+                      background: "radial-gradient(circle at 35% 30%, #8b1824 0%, #3e0b12 100%)",
+                      border: "1px solid rgba(212,165,116,0.35)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 17,
+                    }}>
+                      🔒
+                    </div>
+                    <span style={{
+                      fontSize: 11, color: "#d4a574",
+                      background: "rgba(212,165,116,0.12)",
+                      border: "1px solid rgba(212,165,116,0.22)",
+                      padding: "3px 10px", borderRadius: 16, fontWeight: 700,
+                    }}>
+                      GUARDIAN LOCK
+                    </span>
+                  </div>
+
+                  <h4 style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 19, fontWeight: 600, color: "#faf8f5", margin: "0 0 8px",
+                  }}>
+                    Secret Question Protection
+                  </h4>
+                  <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.5, margin: "0 0 16px" }}>
+                    A lock only the two of you hold the key to. Guard your envelope behind a private question that only your recipient can solve.
+                  </p>
+
+                  <div style={{
+                    background: "rgba(8, 2, 5, 0.85)",
+                    border: "1px solid rgba(212,165,116,0.18)",
+                    borderRadius: 12,
+                    padding: "12px 14px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}>
+                    <div style={{ fontSize: 10.5, color: "#d4a574", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      ✦ Guardian Riddle
+                    </div>
+                    <div style={{ fontSize: 13, color: "#faf8f5", fontStyle: "italic", fontFamily: "Georgia, serif" }}>
+                      &ldquo;Where did we get caught in the heavy rain in 2023?&rdquo;
+                    </div>
+                    <div style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: 8, padding: "6px 10px", marginTop: 4,
+                    }}>
+                      <span style={{ fontSize: 11, color: "rgba(250,248,245,0.4)" }}>Enter secret answer...</span>
+                      <span style={{ marginLeft: "auto", fontSize: 11, color: "#5ae08a", fontWeight: 600 }}>Unlock 🔓</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 12, color: "rgba(250,248,245,0.6)" }}>
+                  🛡️ Failed attempts are logged live on your status dashboard.
+                </div>
+              </div>
+
+              {/* CARD 2: TIME-LOCK VAULT */}
+              <div style={{
+                background: "rgba(10, 3, 7, 0.75)",
+                border: "1px solid rgba(212, 165, 116, 0.22)",
+                borderRadius: 18,
+                padding: "24px 20px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: "50%",
+                      background: "radial-gradient(circle at 35% 30%, #a16207 0%, #451a03 100%)",
+                      border: "1px solid rgba(212,165,116,0.35)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 17,
+                    }}>
+                      ⏳
+                    </div>
+                    <span style={{
+                      fontSize: 11, color: "#f59e0b",
+                      background: "rgba(245,158,11,0.12)",
+                      border: "1px solid rgba(245,158,11,0.25)",
+                      padding: "3px 10px", borderRadius: 16, fontWeight: 700,
+                    }}>
+                      TIME-LOCK VAULT
+                    </span>
+                  </div>
+
+                  <h4 style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 19, fontWeight: 600, color: "#faf8f5", margin: "0 0 8px",
+                  }}>
+                    Scheduled Countdown Release
+                  </h4>
+                  <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.5, margin: "0 0 16px" }}>
+                    Write it today. They unlock it on their special day. Lock your letter until a future birthday, anniversary, or milestone moment.
+                  </p>
+
+                  <div style={{
+                    background: "rgba(8, 2, 5, 0.85)",
+                    border: "1px solid rgba(212,165,116,0.18)",
+                    borderRadius: 12,
+                    padding: "12px 14px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 10.5, color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        🗓 Birthday Morning
+                      </span>
+                      <span style={{ fontSize: 11, color: "rgba(250,248,245,0.45)" }}>Aug 15 · 10:00 AM</span>
+                    </div>
+                    <div style={{
+                      display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, textAlign: "center", marginTop: 4,
+                    }}>
+                      {[
+                        { val: "14", label: "Days" },
+                        { val: "06", label: "Hours" },
+                        { val: "22", label: "Mins" },
+                        { val: "45", label: "Secs" },
+                      ].map(b => (
+                        <div key={b.label} style={{
+                          background: "rgba(245,158,11,0.1)",
+                          border: "1px solid rgba(245,158,11,0.22)",
+                          borderRadius: 6, padding: "5px 2px",
+                        }}>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#faf8f5", fontFamily: "monospace" }}>{b.val}</div>
+                          <div style={{ fontSize: 9.5, color: "#f59e0b" }}>{b.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 12, color: "rgba(250,248,245,0.6)" }}>
+                  ⏰ Wax seal stays locked until the exact scheduled minute.
+                </div>
+              </div>
+
+              {/* CARD 3: TWO-WAY SEALED REPLIES */}
+              <div style={{
+                background: "rgba(10, 3, 7, 0.75)",
+                border: "1px solid rgba(212, 165, 116, 0.22)",
+                borderRadius: 18,
+                padding: "24px 20px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: "50%",
+                      background: "radial-gradient(circle at 35% 30%, #047857 0%, #064e3b 100%)",
+                      border: "1px solid rgba(70,210,110,0.35)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 17,
+                    }}>
+                      📬
+                    </div>
+                    <span style={{
+                      fontSize: 11, color: "#5ae08a",
+                      background: "rgba(40,160,80,0.15)",
+                      border: "1px solid rgba(70,210,110,0.3)",
+                      padding: "3px 10px", borderRadius: 16, fontWeight: 700,
+                    }}>
+                      TWO-WAY REPLIES
+                    </span>
+                  </div>
+
+                  <h4 style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 19, fontWeight: 600, color: "#faf8f5", margin: "0 0 8px",
+                  }}>
+                    Sealed Secret Responses
+                  </h4>
+                  <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.5, margin: "0 0 16px" }}>
+                    Not a chat thread — an intimate exchange of sealed letters. Your recipient can write and wax-seal a secret reply back to you.
+                  </p>
+
+                  <div style={{
+                    background: "rgba(8, 2, 5, 0.85)",
+                    border: "1px solid rgba(212,165,116,0.18)",
+                    borderRadius: 12,
+                    padding: "12px 14px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, color: "#faf8f5", fontFamily: "'Playfair Display', serif" }}>
+                        ✉ Sealed Response
+                      </span>
+                      <span style={{ fontSize: 10, color: "#5ae08a", background: "rgba(40,160,80,0.18)", padding: "2px 6px", borderRadius: 8, fontWeight: 600 }}>
+                        New Reply
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, color: "rgba(250,248,245,0.65)", fontStyle: "italic" }}>
+                      &ldquo;I read this tonight. My eyes filled with tears...&rdquo;
+                    </div>
+                    <div style={{
+                      background: "linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)",
+                      color: "#ffffff", padding: "5px 10px", borderRadius: 6, fontSize: 11.5, fontWeight: 600, textAlign: "center", marginTop: 2,
+                    }}>
+                      Unseal Response →
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 12, color: "rgba(250,248,245,0.6)" }}>
+                  💌 Instant email notifications whenever a reply is sealed.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── SLIDE 5: REAL-TIME EMAIL INTELLIGENCE & ALERTS ── */}
+          <div style={{
+            flex: "0 0 100%",
+            minWidth: "100%",
+            scrollSnapAlign: "start",
+            boxSizing: "border-box",
+            background: "linear-gradient(145deg, rgba(28, 10, 18, 0.92) 0%, rgba(14, 4, 10, 0.96) 100%)",
+            border: "1px solid rgba(212, 165, 116, 0.28)",
+            borderRadius: 20,
+            padding: "36px 28px",
+            boxShadow: "0 16px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", top: -50, right: -50, width: 260, height: 260,
+              background: "radial-gradient(circle, rgba(196,30,58,0.15) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }} />
+
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 11.5,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "#d4a574",
+                marginBottom: 10,
+                background: "rgba(212,165,116,0.08)",
+                border: "1px solid rgba(212,165,116,0.22)",
+                padding: "4px 14px",
+                borderRadius: 20,
+              }}>
+                <span>✦</span> REAL-TIME EMAIL INTELLIGENCE
+              </div>
+              <h3 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "clamp(24px, 4vw, 32px)",
+                fontWeight: 600,
+                color: "#faf8f5",
+                margin: "0 0 8px",
+                lineHeight: 1.25,
+              }}>
+                Never Wonder If They Opened It. Instant Email Receipts.
+              </h3>
+              <p style={{
+                fontSize: 14.5,
+                color: "rgba(250,248,245,0.72)",
+                maxWidth: 680,
+                lineHeight: 1.55,
+                margin: 0,
+              }}>
+                Provide your email in the composer to receive discreet, beautifully formatted alerts the exact second your words touch their hands.
+              </p>
+            </div>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
+              gap: 28,
+              alignItems: "stretch",
+            }}>
+              {/* Left: Simulated Inbox Notifications Stream */}
+              <div style={{
+                background: "rgba(10, 3, 7, 0.8)",
+                border: "1px solid rgba(212,165,116,0.22)",
+                borderRadius: 16,
+                padding: "20px 18px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingBottom: 10,
+                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 16 }}>📫</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#faf8f5" }}>
+                      Your Inbox · Live Alerts
+                    </span>
                   </div>
                   <span style={{
                     fontSize: 10.5, color: "#5ae08a",
                     background: "rgba(40,160,80,0.18)",
                     border: "1px solid rgba(70,210,110,0.3)",
                     padding: "2px 8px", borderRadius: 10, fontWeight: 600,
+                    display: "flex", alignItems: "center", gap: 4,
                   }}>
-                    Physical Print
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#5ae08a" }} />
+                    Active
                   </span>
                 </div>
-                <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.72)", margin: 0, lineHeight: 1.5 }}>
-                  Turn your digital letter into a physical tangible memory. Generates a ready-to-print A4 PDF template with fold lines so you or your recipient can fold a real origami envelope at home.
-                </p>
-              </div>
 
-              {/* Feature 3: 1-Tap Photo Attachment in Composer */}
-              <div style={{
-                background: "rgba(10, 3, 7, 0.6)",
-                border: "1px solid rgba(212,165,116,0.22)",
-                borderRadius: 16,
-                padding: "16px 22px",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}>
-                <span style={{ fontSize: 18 }}>📸</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#faf8f5" }}>
-                    Attach Any Photo In 1-Tap
-                  </div>
-                  <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.65)", lineHeight: 1.4 }}>
-                    Upload any photo directly in the composer. Photos render as authentic Polaroids with gentle tilt and handwritten captions.
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
-        {/* ── ARTISAN ENVELOPES & PAPER THEMES SHOWCASE (SOLO CREATOR'S ATELIER) ── */}
-        <div style={{
-          background: "linear-gradient(145deg, rgba(24, 9, 16, 0.94) 0%, rgba(12, 3, 8, 0.98) 100%)",
-          border: "1px solid rgba(212, 165, 116, 0.28)",
-          borderRadius: 20,
-          padding: "38px 30px",
-          marginTop: 32,
-          boxShadow: "0 16px 44px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-          position: "relative",
-          overflow: "hidden",
-        }}>
-          {/* Ambient lighting glow */}
-          <div style={{
-            position: "absolute", top: -30, right: -30, width: 280, height: 280,
-            background: "radial-gradient(circle, rgba(196, 30, 58, 0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }} />
-
-          {/* Header */}
-          <div style={{ marginBottom: 32 }}>
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 11.5,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "#d4a574",
-              marginBottom: 10,
-              background: "rgba(212,165,116,0.08)",
-              border: "1px solid rgba(212,165,116,0.22)",
-              padding: "4px 14px",
-              borderRadius: 20,
-            }}>
-              <span>✦</span> SOLO CREATOR&apos;S STUDIO
-            </div>
-            <h3 style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: "clamp(24px, 4vw, 32px)",
-              fontWeight: 600,
-              color: "#faf8f5",
-              margin: "0 0 10px",
-              lineHeight: 1.25,
-            }}>
-              Lost An Unreasonable Amount of Sleep Over These Envelopes.
-            </h3>
-            <p style={{
-              fontSize: 14.5,
-              color: "rgba(250,248,245,0.75)",
-              maxWidth: 740,
-              lineHeight: 1.6,
-              margin: 0,
-            }}>
-              I hand-crafted this entire stationery collection from scratch because an intimate letter shouldn&apos;t look like a boring chat bubble. Every 3D wax drip, linen texture, and ribbon was tuned by hand so opening your letter feels like a slow, unforgettable ritual.
-            </p>
-          </div>
-
-          {/* 2-Column Grid */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
-            gap: 24,
-          }}>
-
-            {/* Column 1: 8 Handcrafted Envelope Styles */}
-            <div style={{
-              background: "rgba(10, 3, 7, 0.7)",
-              border: "1px solid rgba(212,165,116,0.2)",
-              borderRadius: 16,
-              padding: "22px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 14,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>💌</span>
-                  <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                    8 Bespoke Envelope Rituals
-                  </h4>
-                </div>
-                <span style={{
-                  fontSize: 11, color: "#d4a574",
-                  background: "rgba(212,165,116,0.12)",
+                <div style={{
+                  background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(212,165,116,0.25)",
-                  padding: "2px 8px", borderRadius: 10, fontWeight: 600,
-                }}>
-                  Interactive Wax Seals
-                </span>
-              </div>
-
-              {/* Envelope Showcase Chips Grid (Clean, compact, no clutter) */}
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: 10,
-              }}>
-                {[
-                  { name: "Classic Wax Seal", icon: "🕯️" },
-                  { name: "Twine & Botanical", icon: "🌿" },
-                  { name: "Gold Wax Drip", icon: "✨" },
-                  { name: "Silk Ribbon", icon: "🎀" },
-                  { name: "Vintage Crest", icon: "👑" },
-                  { name: "Floral Washi", icon: "🌸" },
-                  { name: "Lace & Pearl", icon: "🦪" },
-                  { name: "Velvet & Tassel", icon: "🧵" },
-                ].map((env) => (
-                  <div
-                    key={env.name}
-                    style={{
-                      background: "rgba(255, 255, 255, 0.03)",
-                      border: "1px solid rgba(212, 165, 116, 0.16)",
-                      borderRadius: 10,
-                      padding: "10px 12px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <span style={{ fontSize: 15 }}>{env.icon}</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>{env.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Column 2: 9 Tactile Paper Canvases & Atmospheric Themes */}
-            <div style={{
-              background: "rgba(10, 3, 7, 0.7)",
-              border: "1px solid rgba(212,165,116,0.2)",
-              borderRadius: 16,
-              padding: "22px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 14,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>📜</span>
-                  <h4 style={{ fontSize: 16, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
-                    9 Tactile Stationery Canvases
-                  </h4>
-                </div>
-                <span style={{
-                  fontSize: 11, color: "#5ae08a",
-                  background: "rgba(40,160,80,0.18)",
-                  border: "1px solid rgba(70,210,110,0.3)",
-                  padding: "2px 8px", borderRadius: 10, fontWeight: 600,
-                }}>
-                  Real Paper Grain
-                </span>
-              </div>
-
-              {/* Themes Breakdown (Clean 3-card layout) */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {/* Paper Textures */}
-                <div style={{
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(212, 165, 116, 0.16)",
-                  borderRadius: 10,
-                  padding: "11px 14px",
-                }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
-                    Archival Paper Textures
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
-                    Soft Handmade Cotton · Crisp French Linen · Aged Parchment
-                  </div>
-                </div>
-
-                {/* Atmospheric Lighting */}
-                <div style={{
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(212, 165, 116, 0.16)",
-                  borderRadius: 10,
-                  padding: "11px 14px",
-                }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
-                    Velvet Lighting &amp; Gradients
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
-                    Classic Burgundy · Sunset Dusk · Velvet Aurora
-                  </div>
-                </div>
-
-                {/* Intimate Motifs */}
-                <div style={{
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(212, 165, 116, 0.16)",
-                  borderRadius: 10,
-                  padding: "11px 14px",
-                }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#d4a574", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>
-                    Intimate Hand-Drawn Motifs
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#faf8f5" }}>
-                    Midnight Constellations · Falling Petals · Heirloom Wild Roses
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Playful Solo Creator Badge Footer */}
-          <div style={{
-            marginTop: 24,
-            paddingTop: 16,
-            borderTop: "1px solid rgba(212,165,116,0.15)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            fontSize: 12.5,
-            color: "rgba(212,165,116,0.9)",
-            fontStyle: "italic",
-          }}>
-            ✦ My sleep schedule died so your most meaningful words don&apos;t have to live in a plain text message.
-          </div>
-        </div>
-
-        {/* ── EXCLUSIVE RITUALS & PRIVACY VAULT (GUARDIAN, TIMELOCK, REPLIES) ── */}
-        <div style={{ marginTop: 48 }}>
-          {/* Section Sub-Header */}
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 11.5,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "#d4a574",
-              marginBottom: 10,
-              background: "rgba(212,165,116,0.08)",
-              border: "1px solid rgba(212,165,116,0.2)",
-              padding: "4px 14px",
-              borderRadius: 20,
-            }}>
-              <span>✦</span> INTIMATE RITUALS &amp; VAULT SECURITY
-            </div>
-            <h3 style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: "clamp(24px, 4vw, 32px)",
-              fontWeight: 600,
-              color: "#faf8f5",
-              margin: "0 0 10px",
-              lineHeight: 1.25,
-            }}>
-              More Than Just Words. A Sacred Experience.
-            </h3>
-            <p style={{
-              fontSize: 14.5,
-              color: "rgba(250,248,245,0.7)",
-              maxWidth: 560,
-              margin: "0 auto",
-              lineHeight: 1.55,
-            }}>
-              From private memory riddles and timed countdown vaults to intimate handwritten replies sealed in return.
-            </p>
-          </div>
-
-          {/* 3-Column Luxury Feature Cards */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: 24,
-            alignItems: "stretch",
-          }}>
-
-            {/* ── CARD 1: GUARDIAN QUESTION LOCK ── */}
-            <div style={{
-              background: "linear-gradient(145deg, rgba(28, 10, 18, 0.88) 0%, rgba(16, 5, 11, 0.95) 100%)",
-              border: "1px solid rgba(212, 165, 116, 0.24)",
-              borderRadius: 18,
-              padding: "26px 22px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              boxShadow: "0 14px 36px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
-            }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                  <div style={{
-                    width: 42, height: 42, borderRadius: "50%",
-                    background: "radial-gradient(circle at 35% 30%, #8b1824 0%, #3e0b12 100%)",
-                    border: "1px solid rgba(212,165,116,0.35)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 18,
-                  }}>
-                    🔒
-                  </div>
-                  <span style={{
-                    fontSize: 11, color: "#d4a574",
-                    background: "rgba(212,165,116,0.12)",
-                    border: "1px solid rgba(212,165,116,0.22)",
-                    padding: "3px 10px", borderRadius: 16, fontWeight: 700,
-                  }}>
-                    GUARDIAN LOCK
-                  </span>
-                </div>
-
-                <h4 style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: 20, fontWeight: 600, color: "#faf8f5", margin: "0 0 8px",
-                }}>
-                  Secret Question Protection
-                </h4>
-                <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.5, margin: "0 0 16px" }}>
-                  A lock only the two of you hold the key to. Guard your envelope behind a private question that only your recipient can solve.
-                </p>
-
-                {/* Visual Mockup Box */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.75)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 12,
-                  padding: "14px 14px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                }}>
-                  <div style={{ fontSize: 10.5, color: "#d4a574", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    ✦ Guardian Riddle
-                  </div>
-                  <div style={{ fontSize: 13, color: "#faf8f5", fontStyle: "italic", fontFamily: "Georgia, serif" }}>
-                    &ldquo;Where did we get caught in the heavy rain in 2023?&rdquo;
-                  </div>
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 8, padding: "6px 10px", marginTop: 4,
-                  }}>
-                    <span style={{ fontSize: 11, color: "rgba(250,248,245,0.4)" }}>Enter secret answer...</span>
-                    <span style={{ marginLeft: "auto", fontSize: 11, color: "#5ae08a", fontWeight: 600 }}>Unlock 🔓</span>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 12.5, color: "rgba(250,248,245,0.6)" }}>
-                🛡️ Failed attempts are logged live on your status dashboard.
-              </div>
-            </div>
-
-            {/* ── CARD 2: TIME-LOCK VAULT ── */}
-            <div style={{
-              background: "linear-gradient(145deg, rgba(28, 10, 18, 0.88) 0%, rgba(16, 5, 11, 0.95) 100%)",
-              border: "1px solid rgba(212, 165, 116, 0.24)",
-              borderRadius: 18,
-              padding: "26px 22px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              boxShadow: "0 14px 36px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
-            }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                  <div style={{
-                    width: 42, height: 42, borderRadius: "50%",
-                    background: "radial-gradient(circle at 35% 30%, #a16207 0%, #451a03 100%)",
-                    border: "1px solid rgba(212,165,116,0.35)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 18,
-                  }}>
-                    ⏳
-                  </div>
-                  <span style={{
-                    fontSize: 11, color: "#f59e0b",
-                    background: "rgba(245,158,11,0.12)",
-                    border: "1px solid rgba(245,158,11,0.25)",
-                    padding: "3px 10px", borderRadius: 16, fontWeight: 700,
-                  }}>
-                    TIME-LOCK VAULT
-                  </span>
-                </div>
-
-                <h4 style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: 20, fontWeight: 600, color: "#faf8f5", margin: "0 0 8px",
-                }}>
-                  Scheduled Countdown Release
-                </h4>
-                <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.5, margin: "0 0 16px" }}>
-                  Write it today. They unlock it on their special day. Lock your letter until a future birthday, anniversary, or milestone moment.
-                </p>
-
-                {/* Visual Mockup Box */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.75)",
-                  border: "1px solid rgba(212,165,116,0.18)",
-                  borderRadius: 12,
-                  padding: "14px 14px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 10.5, color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                      🗓 Birthday Morning
-                    </span>
-                    <span style={{ fontSize: 11, color: "rgba(250,248,245,0.45)" }}>Aug 15 · 10:00 AM</span>
-                  </div>
-                  <div style={{
-                    display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, textAlign: "center", marginTop: 4,
-                  }}>
-                    {[
-                      { val: "14", label: "Days" },
-                      { val: "06", label: "Hours" },
-                      { val: "22", label: "Mins" },
-                      { val: "45", label: "Secs" },
-                    ].map(b => (
-                      <div key={b.label} style={{
-                        background: "rgba(245,158,11,0.1)",
-                        border: "1px solid rgba(245,158,11,0.22)",
-                        borderRadius: 6, padding: "5px 2px",
-                      }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: "#faf8f5", fontFamily: "monospace" }}>{b.val}</div>
-                        <div style={{ fontSize: 9.5, color: "#f59e0b" }}>{b.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 12.5, color: "rgba(250,248,245,0.6)" }}>
-                ⏰ Wax seal stays locked until the exact scheduled minute.
-              </div>
-            </div>
-
-            {/* ── CARD 3: TWO-WAY SEALED REPLIES ── */}
-            <div style={{
-              background: "linear-gradient(145deg, rgba(28, 10, 18, 0.88) 0%, rgba(16, 5, 11, 0.95) 100%)",
-              border: "1px solid rgba(212, 165, 116, 0.24)",
-              borderRadius: 18,
-              padding: "26px 22px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              boxShadow: "0 14px 36px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
-            }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                  <div style={{
-                    width: 42, height: 42, borderRadius: "50%",
-                    background: "radial-gradient(circle at 35% 30%, #047857 0%, #064e3b 100%)",
-                    border: "1px solid rgba(70,210,110,0.35)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 18,
-                  }}>
-                    📬
-                  </div>
-                  <span style={{
-                    fontSize: 11, color: "#5ae08a",
-                    background: "rgba(40,160,80,0.15)",
-                    border: "1px solid rgba(70,210,110,0.3)",
-                    padding: "3px 10px", borderRadius: 16, fontWeight: 700,
-                  }}>
-                    TWO-WAY REPLIES
-                  </span>
-                </div>
-
-                <h4 style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: 20, fontWeight: 600, color: "#faf8f5", margin: "0 0 8px",
-                }}>
-                  Sealed Secret Responses
-                </h4>
-                <p style={{ fontSize: 13.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.5, margin: "0 0 16px" }}>
-                  Not a chat thread — an intimate exchange of sealed letters. Your recipient can write and wax-seal a secret reply back to you.
-                </p>
-
-                {/* Visual Mockup Box */}
-                <div style={{
-                  background: "rgba(10, 3, 7, 0.75)",
-                  border: "1px solid rgba(212,165,116,0.18)",
                   borderRadius: 12,
                   padding: "12px 14px",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
+                  gap: 12,
+                  alignItems: "flex-start",
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: "#faf8f5", fontFamily: "'Playfair Display', serif" }}>
-                      ✉ Sealed Response
-                    </span>
-                    <span style={{ fontSize: 10, color: "#5ae08a", background: "rgba(40,160,80,0.18)", padding: "2px 6px", borderRadius: 8, fontWeight: 600 }}>
-                      New Reply
-                    </span>
-                  </div>
-                  <div style={{ fontSize: 12, color: "rgba(250,248,245,0.65)", fontStyle: "italic" }}>
-                    &ldquo;I read this tonight. My eyes filled with tears...&rdquo;
-                  </div>
                   <div style={{
-                    background: "linear-gradient(135deg, #c41e3a 0%, #8b1824 100%)",
-                    color: "#ffffff", padding: "5px 10px", borderRadius: 6, fontSize: 11.5, fontWeight: 600, textAlign: "center", marginTop: 2,
+                    width: 32, height: 32, borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 30%, #c41e3a 0%, #6b101b 100%)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 14, flexShrink: 0,
+                    boxShadow: "0 2px 8px rgba(196,30,58,0.4)",
                   }}>
-                    Unseal Response →
+                    💌
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>Letter Unsealed &amp; Read</span>
+                      <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>Just now</span>
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
+                      Your recipient broke the wax seal on <strong style={{ color: "#d4a574" }}>iPhone</strong>. Audio started playing.
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 12,
+                  padding: "12px 14px",
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "flex-start",
+                }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 30%, #ec4899 0%, #831843 100%)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 14, flexShrink: 0,
+                  }}>
+                    💖
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>New Emotional Reaction</span>
+                      <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>2m ago</span>
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
+                      Recipient reacted: <strong style={{ color: "#f472b6" }}>&ldquo;Loved it ❤️&rdquo;</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(70,210,110,0.22)",
+                  borderRadius: 12,
+                  padding: "12px 14px",
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "flex-start",
+                }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 30%, #059669 0%, #064e3b 100%)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 14, flexShrink: 0,
+                  }}>
+                    📬
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>Sealed Response Received</span>
+                      <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>5m ago</span>
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
+                      They wrote back and sealed a private reply. Click to unseal.
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 12,
+                  padding: "12px 14px",
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "flex-start",
+                }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 30%, #3b82f6 0%, #1e3a8a 100%)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 14, flexShrink: 0,
+                  }}>
+                    🔗
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: "#faf8f5" }}>Shared Link Opened</span>
+                      <span style={{ fontSize: 10, color: "rgba(250,248,245,0.4)" }}>12m ago</span>
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.7)", lineHeight: 1.4 }}>
+                      Letter was opened on a new device (<strong style={{ color: "#60a5fa" }}>Mac</strong>).
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 12.5, color: "rgba(250,248,245,0.6)" }}>
-                💌 Instant email notifications whenever a reply is sealed.
+              {/* Right: The 5 Core Email Alert Features */}
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{
+                    background: "rgba(10, 3, 7, 0.6)",
+                    border: "1px solid rgba(212,165,116,0.18)",
+                    borderRadius: 14,
+                    padding: "14px 16px",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                      <span style={{ color: "#d4a574", fontSize: 14 }}>⚡</span>
+                      <h4 style={{ fontSize: 14.5, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
+                        Instant Unseal Receipts
+                      </h4>
+                    </div>
+                    <p style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.4 }}>
+                      Sent the exact second the wax seal is broken. Pinpoints whether opened on <strong style={{ color: "#d4a574" }}>iPhone, Android, Mac, or PC</strong>.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    background: "rgba(10, 3, 7, 0.6)",
+                    border: "1px solid rgba(212,165,116,0.18)",
+                    borderRadius: 14,
+                    padding: "14px 16px",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                      <span style={{ color: "#f472b6", fontSize: 14 }}>💖</span>
+                      <h4 style={{ fontSize: 14.5, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
+                        Heartfelt Reaction Alerts
+                      </h4>
+                    </div>
+                    <p style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.4 }}>
+                      Discover how they felt in real time when they tap emotional reactions after reading your words.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    background: "rgba(10, 3, 7, 0.6)",
+                    border: "1px solid rgba(212,165,116,0.18)",
+                    borderRadius: 14,
+                    padding: "14px 16px",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                      <span style={{ color: "#5ae08a", fontSize: 14 }}>📬</span>
+                      <h4 style={{ fontSize: 14.5, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
+                        Two-Way Secret Reply Delivery
+                      </h4>
+                    </div>
+                    <p style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.4 }}>
+                      When your recipient writes and seals a response, you get an immediate email with a direct unseal link.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    background: "rgba(10, 3, 7, 0.6)",
+                    border: "1px solid rgba(228,32,56,0.22)",
+                    borderRadius: 14,
+                    padding: "14px 16px",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                      <span style={{ color: "#ff6b7d", fontSize: 14 }}>🔥</span>
+                      <h4 style={{ fontSize: 14.5, fontWeight: 700, color: "#faf8f5", margin: 0 }}>
+                        1-Tap Self-Destruct Killswitch
+                      </h4>
+                    </div>
+                    <p style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", margin: 0, lineHeight: 1.4 }}>
+                      Changed your mind? Use the private link sent to your email to permanently vaporize your letter, photos, and voice notes anytime.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{
+                  fontSize: 12,
+                  color: "rgba(250,248,245,0.55)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  paddingTop: 6,
+                }}>
+                  <span style={{ color: "#5ae08a" }}>✓</span> 100% Private · Zero spam · Enter your email in the composer.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── SLIDE 6: THE MUSE AI ASSISTANT & TRACKING ── */}
+          <div style={{
+            flex: "0 0 100%",
+            minWidth: "100%",
+            scrollSnapAlign: "start",
+            boxSizing: "border-box",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 28,
+            alignItems: "stretch",
+          }}>
+            {/* CARD 1: THE MUSE AI WRITING ASSISTANT */}
+            <div style={{
+              background: "linear-gradient(145deg, rgba(28, 10, 18, 0.88) 0%, rgba(16, 5, 11, 0.95) 100%)",
+              border: "1px solid rgba(212, 165, 116, 0.25)",
+              borderRadius: 20,
+              padding: "32px 28px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+            }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 30%, #8b1824 0%, #4a0d14 100%)",
+                    border: "1px solid rgba(212,165,116,0.4)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 22,
+                  }}>
+                    ✨
+                  </div>
+                  <span style={{
+                    fontSize: 11.5, color: "#d4a574",
+                    background: "rgba(212,165,116,0.12)",
+                    border: "1px solid rgba(212,165,116,0.25)",
+                    padding: "4px 12px", borderRadius: 20, fontWeight: 700, letterSpacing: "0.05em",
+                  }}>
+                    AI WRITING COMPANION
+                  </span>
+                </div>
+
+                <h3 style={{
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontSize: 24, fontWeight: 600, color: "#faf8f5", margin: "0 0 10px",
+                }}>
+                  The Muse (AI Assistant)
+                </h3>
+                <p style={{ fontSize: 14.5, color: "rgba(250,248,245,0.72)", lineHeight: 1.6, margin: "0 0 22px" }}>
+                  Find the right words when emotion runs deep. 1-tap heartfelt starters, text polishing, and dynamic title generation that sounds genuinely human.
+                </p>
+
+                <div style={{
+                  background: "rgba(8, 2, 6, 0.75)",
+                  border: "1px solid rgba(212,165,116,0.2)",
+                  borderRadius: 14,
+                  padding: "16px 18px",
+                  marginBottom: 20,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d4a574", fontWeight: 700 }}>
+                      ✦ Live Generation Example
+                    </span>
+                    <span style={{ fontSize: 11.5, color: "rgba(250,248,245,0.45)" }}>Prompt: &quot;miss our cricket matches&quot;</span>
+                  </div>
+                  <div style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: "#d4a574",
+                    marginBottom: 6,
+                  }}>
+                    Title: &ldquo;Missing Match Days&rdquo;
+                  </div>
+                  <p style={{
+                    fontSize: 13.5,
+                    color: "rgba(250,248,245,0.85)",
+                    fontFamily: "Georgia, serif",
+                    fontStyle: "italic",
+                    lineHeight: 1.55,
+                    margin: 0,
+                  }}>
+                    &ldquo;I often think about the fun times we had watching cricket together, and it&apos;s just not the same without you. I really miss our discussions and the laughter we shared.&rdquo;
+                  </p>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {[
+                    { icon: "💡", title: "Emotionally Intelligent Starters", text: "Turns raw notes into heartfelt handwriting without clichés." },
+                    { icon: "🏷️", title: "Context-Aware Titles", text: "Synthesizes creative, matching letter titles for your exact memories." },
+                    { icon: "✍️", title: "Polish & Finish Thoughts", text: "Refines messy drafts while preserving your authentic voice." },
+                  ].map(item => (
+                    <div key={item.title} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                      <span style={{ fontSize: 15, lineHeight: 1.3 }}>{item.icon}</span>
+                      <div>
+                        <div style={{ fontSize: 13.5, fontWeight: 600, color: "#faf8f5" }}>{item.title}</div>
+                        <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.55)", lineHeight: 1.4 }}>{item.text}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <Link href="/create" style={{
+                  color: "#d4a574", fontSize: 13.5, fontWeight: 600, textDecoration: "none",
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                }}>
+                  Try The Muse in Composer →
+                </Link>
               </div>
             </div>
 
+            {/* CARD 2: LIVE DELIVERY & MULTI-DEVICE TRACKING */}
+            <div style={{
+              background: "linear-gradient(145deg, rgba(28, 10, 18, 0.88) 0%, rgba(16, 5, 11, 0.95) 100%)",
+              border: "1px solid rgba(228, 32, 56, 0.28)",
+              borderRadius: 20,
+              padding: "32px 28px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+            }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 30%, #ff2b47 0%, #8b1824 100%)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 22,
+                  }}>
+                    📱
+                  </div>
+                  <span style={{
+                    fontSize: 11.5, color: "#5ae08a",
+                    background: "rgba(40,160,80,0.15)",
+                    border: "1px solid rgba(70,210,110,0.35)",
+                    padding: "4px 12px", borderRadius: 20, fontWeight: 700, letterSpacing: "0.05em",
+                  }}>
+                    LIVE DASHBOARD
+                  </span>
+                </div>
+
+                <h3 style={{
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontSize: 24, fontWeight: 600, color: "#faf8f5", margin: "0 0 10px",
+                }}>
+                  Real-Time Multi-Device Tracking
+                </h3>
+                <p style={{ fontSize: 14.5, color: "rgba(250,248,245,0.72)", lineHeight: 1.6, margin: "0 0 22px" }}>
+                  Every letter gets a private management dashboard. Know the exact moment they broke the wax seal and how many times they returned to re-read.
+                </p>
+
+                <div style={{
+                  background: "rgba(8, 2, 6, 0.75)",
+                  border: "1px solid rgba(228, 32, 56, 0.25)",
+                  borderRadius: 14,
+                  padding: "16px 18px",
+                  marginBottom: 20,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#faf8f5" }}>Live Milestone Status</span>
+                    <span style={{ fontSize: 11, color: "#5ae08a", background: "rgba(40,160,80,0.2)", padding: "2px 8px", borderRadius: 10, fontWeight: 600 }}>
+                      ● Unsealed &amp; Read
+                    </span>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div style={{ background: "rgba(255,255,255,0.03)", padding: "10px 12px", borderRadius: 8 }}>
+                      <div style={{ fontSize: 11, color: "rgba(250,248,245,0.5)" }}>Total Unseals</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: "#faf8f5", fontFamily: "monospace" }}>3 times</div>
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.03)", padding: "10px 12px", borderRadius: 8 }}>
+                      <div style={{ fontSize: 11, color: "rgba(250,248,245,0.5)" }}>Device</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: "#faf8f5" }}>iPhone 15</div>
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: 11.5, color: "rgba(250,248,245,0.45)", fontStyle: "italic" }}>
+                    First unsealed 2 hours ago · Re-opened 14 mins ago
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ color: "#5ae08a" }}>✓</span> <strong>Device Detection:</strong> Tells you if opened on mobile, tablet, or laptop.
+                  </div>
+                  <div style={{ fontSize: 12.5, color: "rgba(250,248,245,0.7)", display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ color: "#5ae08a" }}>✓</span> <strong>Anti-Spam Unique Readers:</strong> Counts genuine readers without page reload inflation.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <Link href="/create" style={{
+                  color: "#ff2b47", fontSize: 13.5, fontWeight: 600, textDecoration: "none",
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                }}>
+                  Compose &amp; Track Your First Letter →
+                </Link>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Bottom Fast-Jump Dots Indicator */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          marginTop: 18,
+        }}>
+          {CAROUSEL_SLIDES.map((slide, idx) => {
+            const isActive = activeSlide === idx;
+            return (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => scrollToSlide(idx)}
+                style={{
+                  width: isActive ? 28 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  background: isActive ? "#d4a574" : "rgba(255, 255, 255, 0.2)",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  transition: "all 0.25s ease",
+                  boxShadow: isActive ? "0 0 10px rgba(212,165,116,0.6)" : "none",
+                }}
+                title={slide.label}
+              />
+            );
+          })}
+        </div>
+
+        {/* Global CTA button below carousel */}
+        <div style={{ textAlign: "center", marginTop: 36 }}>
+          <Link
+            href="/create"
+            className="hero-compose-btn"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "13px 32px",
+              fontSize: 16,
+              fontWeight: 600,
+            }}
+          >
+            Begin Your Letter Now →
+          </Link>
         </div>
       </section>
 

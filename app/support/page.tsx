@@ -121,9 +121,8 @@ export default function SupportPage() {
       }
 
       const keyId =
-        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
         orderData.key_id ||
-        'rzp_test_TPweOsC1Vc2ULD';
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
       // 2. Open Razorpay Checkout Modal
       const options = {
