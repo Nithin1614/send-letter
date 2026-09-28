@@ -25,9 +25,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const key_secret =
-      process.env.RAZORPAY_KEY_SECRET ||
-      'Y79ioO39glp8Lh22VnbKjvFR';
+    const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_secret) {
       console.error('RAZORPAY_KEY_SECRET is not configured in environment variables.');
